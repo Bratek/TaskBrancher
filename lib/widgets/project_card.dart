@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
-class ProjectCard extends StatelessWidget {
-  String name;
-  String description;
+import 'package:task_brancher/models/project.dart';
 
-  ProjectCard({super.key, required this.name, required this.description});
+class ProjectCard extends StatefulWidget {
+  late Project project;
 
+  ProjectCard({super.key, required this.project});
+
+  @override
+  State<ProjectCard> createState() => _ProjectCardState();
+}
+
+class _ProjectCardState extends State<ProjectCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -20,7 +26,7 @@ class ProjectCard extends StatelessWidget {
         Container(
           height: 22,
           padding: const EdgeInsets.only(left: 5, right: 5),
-          child: Text(name,
+          child: Text(widget.project.name,
               style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -30,7 +36,7 @@ class ProjectCard extends StatelessWidget {
         Container(
           height: 58,
           padding: const EdgeInsets.only(left: 5, right: 5),
-          child: Text(description,
+          child: Text(widget.project.description,
               softWrap: true,
               maxLines: 3,
               style: const TextStyle(
