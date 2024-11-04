@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:task_brancher/models/project.dart';
+import 'package:task_brancher/models/task.dart';
 
-class ProjectCard extends StatelessWidget {
-  Project project;
+class TaskCard extends StatelessWidget {
+  Task task;
 
-  ProjectCard({super.key, required this.project});
+  TaskCard({super.key, required this.task});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class ProjectCard extends StatelessWidget {
         Container(
           height: 22,
           padding: const EdgeInsets.only(left: 5, right: 5),
-          child: Text(project.title,
+          child: Text(task.title,
               style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -31,7 +31,7 @@ class ProjectCard extends StatelessWidget {
         Container(
           height: 58,
           padding: const EdgeInsets.only(left: 5, right: 5),
-          child: Text(project.description,
+          child: Text(task.description,
               softWrap: true,
               maxLines: 3,
               style: const TextStyle(

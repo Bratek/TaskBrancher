@@ -19,7 +19,7 @@ class _MyHomePageState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF0EDED),
+      backgroundColor: const Color(0xFFF0EDED),
       appBar: AppBar(
         title: const Text("Список проектов"),
       ),
@@ -29,7 +29,7 @@ class _MyHomePageState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF45D900),
         onPressed: () async {
-          var newProject = Project(name: "", description: "");
+          var newProject = Project(title: "", description: "", parentId: "");
           // Показать форму для добавления проекта
           final result = await projectEditForm(context, newProject);
           if (result) {
@@ -40,6 +40,7 @@ class _MyHomePageState extends State<HomeScreen> {
         },
         child: const Icon(Icons.add),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: ListView.builder(
         itemCount: projects.length,
         itemBuilder: (context, index) {
@@ -89,16 +90,9 @@ class _MyHomePageState extends State<HomeScreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => TasksListScreen(
-                            parentId: projects[index].id,
-                            title: projects[index].name)));
+                        builder: (context) =>
+                            TasksListScreen(parent: projects[index])));
               },
-
-              // onHorizontalDragEnd: (details) {
-              //   if (details.primaryVelocity! > 0) {
-              //     Navigator.push(context, MaterialPageRoute( builder: (context) => TasksListScreen(project: projects[index])));
-              //   }
-              // }
             ),
           );
         },
@@ -108,7 +102,7 @@ class _MyHomePageState extends State<HomeScreen> {
 
   Future<bool> projectEditForm(BuildContext context, Project project) async {
     //контроллеры для ввода c установленными начальными значениями
-    final nameController = TextEditingController(text: project.name);
+    final nameController = TextEditingController(text: project.title);
     final descriptionController =
         TextEditingController(text: project.description);
     bool result = false;
@@ -174,7 +168,7 @@ class _MyHomePageState extends State<HomeScreen> {
                         ),
                         onPressed: () {
                           // Сохранить изменения
-                          project.name = nameController.text;
+                          project.title = nameController.text;
                           project.description = descriptionController.text;
                           result = true;
                           // закрыть форму
