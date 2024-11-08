@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:task_brancher/models/project.dart';
 
 class ProjectCard extends StatelessWidget {
-  Project project;
+  final Project project;
+  bool inFocus = false;
 
-  ProjectCard({super.key, required this.project});
+  ProjectCard({super.key, required this.project, this.inFocus = false});
 
   @override
   Widget build(BuildContext context) {
@@ -15,13 +16,13 @@ class ProjectCard extends StatelessWidget {
       height: 120,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
-          color: Colors.white,
+          color: inFocus ? Colors.white : Color(0xFFF0EDED),
           border: Border.all(color: const Color(0xFFD9D9D9), width: 1)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
           height: 22,
           padding: const EdgeInsets.only(left: 5, right: 5),
-          child: Text(project.title,
+          child: Text("${project.number}. ${project.title}",
               style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

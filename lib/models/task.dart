@@ -1,52 +1,40 @@
-//import 'package:hive/hive.dart';
-import 'package:task_brancher/models/basic.dart';
+import 'package:task_brancher/models/base.dart';
 
-//part 'task.g.dart';
+enum Status { none, inprogress, completed, calceled }
 
-// @HiveType(typeId: 1)
-// class Task {
-//   @HiveField(0)
-//   late String id;
-//   @HiveField(1)
-//   String title;
-//   @HiveField(2)
-//   String description;
-//   @HiveField(3)
-//   late Status status;
-//   @HiveField(4)
-//   String parentId;
-
-//   Task(
-//       {required this.title,
-//       required this.description,
-//       required this.parentId}) {
-//     id = DateTime.now().millisecondsSinceEpoch.toString();
-//     status = Status.none;
-//   }
-// }
-
-// @HiveType(typeId: 2)
-// enum Status {
-//   @HiveField(0)
-//   none,
-//   @HiveField(1)
-//   inprogress,
-//   @HiveField(2)
-//   completed,
-//   @HiveField(3)
-//   calceled
-// }
-
-class Task extends Basic {
-  String number = "";
+class Task extends Base {
   Status status;
+  bool visible = true;
 
   Task(
       {required super.title,
       required super.description,
       required super.parentId,
-      this.number = "",
-      this.status = Status.none});
-}
+      required super.number,
+      super.id,
+      this.status = Status.none,
+      this.visible = true});
 
-enum Status { none, inprogress, completed, calceled }
+  @override
+  factory Task.fromJson(Map<dynamic, dynamic> json) {
+    return Task(
+        id: json['id'],
+        parentId: json['parentId'],
+        title: json['title'],
+        description: json['description'],
+        number: json['number'],
+        status: Status.values.byName(json['status']),
+        visible: json['visible']);
+  }
+
+  @override
+  Map<String, dynamic> tojson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'parentId': parentId,
+        'number': number,
+        'status': status.name,
+        'visible': visible,
+      };
+}

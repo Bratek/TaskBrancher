@@ -1,29 +1,32 @@
-//import 'package:hive/hive.dart';
-import 'package:task_brancher/models/basic.dart';
+import 'package:task_brancher/models/base.dart';
 
-//part 'project.g.dart';
-
-// @HiveType(typeId: 0)
-// class Project extends Basic{
-//   @HiveField(0)
-//   String id = "";
-//   @HiveField(1)
-//   String name = "";
-//   @HiveField(2)
-//   String description = "";
-
-//   Project({required this.name, required this.description}) {
-//     id = DateTime.now().millisecondsSinceEpoch.toString();
-//   }
-
-// }
-
-class Project extends Basic {
-  String number = "";
+class Project extends Base {
+  bool visible = true;
 
   Project(
       {required super.title,
       required super.description,
       required super.parentId,
-      this.number = ""});
+      required super.number,
+      super.id,
+      this.visible = true});
+
+  @override
+  factory Project.fromJson(Map<dynamic, dynamic> json) => Project(
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      parentId: json['parentId'],
+      number: json['number'],
+      visible: json['visible']);
+
+  @override
+  Map<String, dynamic> tojson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'parentId': parentId,
+        'number': number,
+        'visible': visible,
+      };
 }

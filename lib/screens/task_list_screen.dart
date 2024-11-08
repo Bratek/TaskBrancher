@@ -1,27 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:task_brancher/models/basic.dart';
+import 'package:page_transition/page_transition.dart';
+//import 'package:hive/hive.dart';
+import 'package:task_brancher/models/base.dart';
 import 'package:task_brancher/models/task.dart';
+import 'package:task_brancher/services/hive_service.dart';
 import 'package:task_brancher/widgets/task_card.dart';
 
 class TasksListScreen extends StatefulWidget {
-  Basic parent;
+  final Base parent;
 
-  TasksListScreen({super.key, required this.parent});
+  const TasksListScreen({super.key, required this.parent});
 
   @override
   State<TasksListScreen> createState() => _TasksListScreenState();
 }
 
 class _TasksListScreenState extends State<TasksListScreen> {
-  List<Task> tasks = [];
-
   @override
   Widget build(BuildContext context) {
+    List<Task> tasks = HiveService.getChildren(widget.parent.id);
+
     return Scaffold(
+      // ignore: prefer_const_constructors
       backgroundColor: Color(0xFFF0EDED),
       appBar: AppBar(
-        title: Text(widget.parent.title),
+        title: Text(
+          "${widget.parent.number}. ${widget.parent.title}",
+          style: const TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
       ),
       // опция для выталкивания клавиатурой bottomSheet виджета
       resizeToAvoidBottomInset: true,
@@ -29,13 +37,18 @@ class _TasksListScreenState extends State<TasksListScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF45D900),
         onPressed: () async {
-          var newTask =
-              Task(parentId: widget.parent.id, title: "", description: "");
+          var newTask = Task(
+              parentId: widget.parent.id,
+              title: "",
+              description: "",
+              number:
+                  "${widget.parent.number}.${(tasks.length + 1).toString()}");
           // Показать форму для добавления проекта
           final result = await taskEditForm(context, newTask);
           if (result) {
             // Добавить проект
-            tasks.add(newTask);
+            //tasks.add(newTask);
+            HiveService.create(newTask);
             setState(() {});
           }
         },
@@ -57,7 +70,8 @@ class _TasksListScreenState extends State<TasksListScreen> {
                 label: 'Удалить',
                 onPressed: (context) {
                   // Удалить проект
-                  tasks.removeAt(index);
+                  //tasks.removeAt(index);
+                  HiveService.delete(tasks[index]);
                   //Обновить список
                   setState(() {});
                 },
@@ -74,8 +88,8 @@ class _TasksListScreenState extends State<TasksListScreen> {
                   onPressed: (context) async {
                     final result = await taskEditForm(context, tasks[index]);
                     if (result) {
-                      // Сохранить изменения
-                      //HiveService.addProject(result);
+                      //Сохранить изменения
+                      HiveService.update(tasks[index]);
                       // Обновить список
                       setState(() {});
                     }
@@ -89,9 +103,13 @@ class _TasksListScreenState extends State<TasksListScreen> {
                 // Открыть окно вложенных задач
                 Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            TasksListScreen(parent: tasks[index])));
+                    PageTransition(
+                      type: PageTransitionType.rightToLeft,
+                      child: TasksListScreen(parent: tasks[index]),
+                    ));
+                // MaterialPageRoute(
+                //     builder: (context) =>
+                //         TasksListScreen(parent: tasks[index])));
               },
             ),
           );

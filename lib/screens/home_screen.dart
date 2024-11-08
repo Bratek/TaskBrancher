@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:task_brancher/screens/task_list_screen.dart';
+import 'package:task_brancher/services/hive_service.dart';
 import 'package:task_brancher/widgets/project_card.dart';
 //import 'package:task_brancher/widgets/project_edit_form.dart';
 
@@ -14,33 +16,44 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<HomeScreen> {
-  List<Project> projects = [];
+  int? currentProject;
 
   @override
   Widget build(BuildContext context) {
+    List<Project> projects = HiveService.getAllProjects();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF0EDED),
       appBar: AppBar(
-        title: const Text("Список проектов"),
+        title: const Text(
+          "Список проектов",
+          style: const TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
       ),
       // опция для выталкивания клавиатурой bottomSheet виджета
       resizeToAvoidBottomInset: true,
       // плавающая кнопка добавления проекта
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF45D900),
         onPressed: () async {
-          var newProject = Project(title: "", description: "", parentId: "");
+          var newProject = Project(
+              title: "",
+              description: "",
+              parentId: "",
+              number: (projects.length + 1).toString());
           // Показать форму для добавления проекта
           final result = await projectEditForm(context, newProject);
           if (result) {
             // Добавить проект
-            projects.add(newProject);
+            HiveService.create(newProject);
             setState(() {});
           }
         },
         child: const Icon(Icons.add),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+
       body: ListView.builder(
         itemCount: projects.length,
         itemBuilder: (context, index) {
@@ -76,6 +89,7 @@ class _MyHomePageState extends State<HomeScreen> {
                     if (result) {
                       // Сохранить изменения
                       //HiveService.addProject(result);
+                      HiveService.update(projects[index]);
                       // Обновить список
                       setState(() {});
                     }
@@ -84,14 +98,25 @@ class _MyHomePageState extends State<HomeScreen> {
               ],
             ),
             child: GestureDetector(
-              child: ProjectCard(project: projects[index]),
+              child: ProjectCard(
+                  project: projects[index],
+                  inFocus: currentProject == index ? true : false),
               onTap: () {
-                // Открыть окно вложенных задач
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            TasksListScreen(parent: projects[index])));
+                if (currentProject != index) {
+                  currentProject = index;
+                  setState(() {});
+                } else {
+                  // Открыть окно вложенных задач
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.rightToLeft,
+                        child: TasksListScreen(parent: projects[index]),
+                      ));
+                }
+                // MaterialPageRoute(
+                //     builder: (context) =>
+                //         TasksListScreen(parent: projects[index])));
               },
             ),
           );
