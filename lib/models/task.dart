@@ -1,6 +1,5 @@
 import 'package:task_brancher/models/base.dart';
-
-enum Status { none, inprogress, completed, calceled }
+import 'package:task_brancher/models/status.dart';
 
 class Task extends Base {
   Status status;
@@ -37,4 +36,6 @@ class Task extends Base {
         'status': status.name,
         'visible': visible,
       };
+
+  String getStatusName() => status.name;
 }

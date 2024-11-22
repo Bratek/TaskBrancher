@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:page_transition/page_transition.dart';
-import 'package:task_brancher/screens/task_list_screen.dart';
-import 'package:task_brancher/services/hive_service.dart';
-import 'package:task_brancher/widgets/project_card.dart';
-//import 'package:task_brancher/widgets/project_edit_form.dart';
-
-import '../models/project.dart';
+import 'package:task_brancher/services/app_library.dart';
+import 'package:task_brancher/services/global.dart' as global;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,27 +11,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<HomeScreen> {
-  int? currentProject;
-
   @override
   Widget build(BuildContext context) {
     List<Project> projects = HiveService.getAllProjects();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF0EDED),
+      backgroundColor: AppTheme.appColor('Background'),
       appBar: AppBar(
-        title: const Text(
+        backgroundColor: AppTheme.appColor('Background'),
+        centerTitle: true,
+        title: Text(
           "Список проектов",
-          style: const TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+          style: AppTheme.appTextStyle('AppBar'),
         ),
       ),
       // опция для выталкивания клавиатурой bottomSheet виджета
       resizeToAvoidBottomInset: true,
       // плавающая кнопка добавления проекта
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF45D900),
+        backgroundColor: AppTheme.appColor('Accent'),
+        elevation: 0,
+        shape: const CircleBorder(),
         onPressed: () async {
           var newProject = Project(
               title: "",
@@ -51,76 +47,133 @@ class _MyHomePageState extends State<HomeScreen> {
             setState(() {});
           }
         },
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          size: 24,
+          color: Colors.white,
+        ),
       ),
-
-      body: ListView.builder(
-        itemCount: projects.length,
-        itemBuilder: (context, index) {
-          return Slidable(
-            key: ValueKey(index),
-            startActionPane:
-                ActionPane(motion: const BehindMotion(), children: [
-              SlidableAction(
-                // An action can be bigger than the others.
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                icon: Icons.delete,
-                label: 'Удалить',
-                onPressed: (context) {
-                  // Удалить проект
-                  projects.removeAt(index);
-                  //Обновить список
-                  setState(() {});
-                },
+      bottomNavigationBar: BottomAppBar(
+        height: 64,
+        elevation: 0,
+        shape: const CircularNotchedRectangle(),
+        color: AppTheme.appColor('Background2'),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+              icon: Image.asset(
+                'assets/images/kanban.png',
+                width: 26,
+                height: 22,
+                color: AppTheme.appColor('IconColor'),
               ),
-            ]),
-            endActionPane: ActionPane(
-              motion: const BehindMotion(),
-              children: [
-                SlidableAction(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  icon: Icons.edit,
-                  label: 'Изменить',
-                  onPressed: (context) async {
-                    final result =
-                        await projectEditForm(context, projects[index]);
-                    if (result) {
-                      // Сохранить изменения
-                      //HiveService.addProject(result);
-                      HiveService.update(projects[index]);
-                      // Обновить список
-                      setState(() {});
-                    }
-                  },
-                ),
-              ],
-            ),
-            child: GestureDetector(
-              child: ProjectCard(
-                  project: projects[index],
-                  inFocus: currentProject == index ? true : false),
-              onTap: () {
-                if (currentProject != index) {
-                  currentProject = index;
-                  setState(() {});
-                } else {
-                  // Открыть окно вложенных задач
-                  Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.rightToLeft,
-                        child: TasksListScreen(parent: projects[index]),
-                      ));
+              onPressed: () {
+                if (global.currentProject != null) {
+                  Navigator.of(context)
+                      .pushNamed('/kanban', arguments: global.currentProject);
                 }
-                // MaterialPageRoute(
-                //     builder: (context) =>
-                //         TasksListScreen(parent: projects[index])));
               },
             ),
-          );
-        },
+            const SizedBox(width: 24),
+            IconButton(
+              icon: Image.asset(
+                'assets/images/tasks.png',
+                width: 24,
+                height: 24,
+                color: AppTheme.appColor('IconColor'),
+              ),
+              onPressed: () {
+                if (global.currentProject != null) {
+                  Navigator.of(context)
+                      .pushNamed('/tasks', arguments: global.currentProject);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            height: 3,
+            color: AppTheme.appColor('Accent'),
+          ),
+          //Отступ
+          const SizedBox(height: 10),
+          //Список проектов
+          Expanded(
+            child: ListView.builder(
+              //shrinkWrap: true,
+              itemCount: projects.length,
+              itemBuilder: (context, index) {
+                return Slidable(
+                  key: ValueKey(index),
+                  startActionPane:
+                      ActionPane(motion: const BehindMotion(), children: [
+                    SlidableAction(
+                      // An action can be bigger than the others.
+                      backgroundColor: AppTheme.appColor('DeleteColor'),
+                      foregroundColor: Colors.white,
+                      icon: Icons.delete,
+                      label: 'Удалить',
+                      onPressed: (context) {
+                        // Удалить проект
+                        projects.removeAt(index);
+                        //Обновить список
+                        setState(() {});
+                      },
+                    ),
+                  ]),
+                  endActionPane: ActionPane(
+                    motion: const BehindMotion(),
+                    children: [
+                      SlidableAction(
+                        backgroundColor: AppTheme.appColor('EditColor'),
+                        foregroundColor: Colors.white,
+                        icon: Icons.edit,
+                        label: 'Изменить',
+                        onPressed: (context) async {
+                          final result =
+                              await projectEditForm(context, projects[index]);
+                          if (result) {
+                            // Сохранить изменения
+                            //HiveService.addProject(result);
+                            HiveService.update(projects[index]);
+                            // Обновить список
+                            setState(() {});
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  child: GestureDetector(
+                    child: ProjectCard(
+                        project: projects[index],
+                        inFocus: projects[index].equals(global.currentProject)),
+                    onTap: () {
+                      if (!projects[index].equals(global.currentProject)) {
+                        global.currentProject = projects[index];
+                        setState(() {});
+                      } else {
+                        // Открыть окно вложенных задач
+                        Navigator.of(context)
+                            .pushNamed('/tasks', arguments: projects[index]);
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) =>
+                        //             TasksListScreen(parent: projects[index])));
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -178,7 +231,10 @@ class _MyHomePageState extends State<HomeScreen> {
                       TextButton(
                         child: const Text(
                           'Отмена',
-                          style: TextStyle(color: Colors.grey, fontSize: 18),
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 18,
+                          ),
                         ),
                         onPressed: () async {
                           result = false;

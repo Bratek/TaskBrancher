@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:task_brancher/screens/home_screen.dart';
-import 'package:task_brancher/services/hive_service.dart';
+import 'package:task_brancher/services/app_library.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,9 +17,26 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      initialRoute: '/',
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute(builder: (context) => const HomeScreen());
+          case '/tasks':
+            Project project = settings.arguments as Project;
+            return MaterialPageRoute(
+                builder: (context) => TasksListScreen(project: project));
+          case '/kanban':
+            Project project = settings.arguments as Project;
+            return MaterialPageRoute(
+                builder: (context) => KanbanScreen(project: project));
+          default:
+            return MaterialPageRoute(builder: (context) => const HomeScreen());
+        }
+      },
+      home: const HomeScreen(),
     );
   }
 }
