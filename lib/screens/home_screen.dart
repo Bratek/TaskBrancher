@@ -13,21 +13,135 @@ class HomeScreen extends StatefulWidget {
 class _MyHomePageState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    List<Project> projects = HiveService.getAllProjects();
+    var projects = HiveService.getProjectsList();
+    if (global.currentProject == null) {
+      if (projects.isNotEmpty) {
+        global.currentProject = projects[0];
+      } 
+    }
 
     return Scaffold(
+      // Цвет фона
       backgroundColor: AppTheme.appColor('Background'),
+      // опция для выталкивания клавиатурой bottomSheet виджета
+      resizeToAvoidBottomInset: true,
+
+      //Шапка ****************************************************************
       appBar: AppBar(
         backgroundColor: AppTheme.appColor('Background'),
-        centerTitle: true,
+        //centerTitle: true,
         title: Text(
           "Список проектов",
           style: AppTheme.appTextStyle('AppBar'),
         ),
       ),
-      // опция для выталкивания клавиатурой bottomSheet виджета
-      resizeToAvoidBottomInset: true,
-      // плавающая кнопка добавления проекта
+
+      //Навигационное меню ****************************************************
+      drawer: Drawer(
+        child: Column(
+          children: [
+            DrawerHeader(
+                // decoration: BoxDecoration(
+                //   //color: AppTheme.appColor('Accent3'),
+                // ),
+                child: Column(children: [
+              Image.asset(
+                'assets/images/logo.png',
+                width: 64,
+                height: 64,
+              ),
+              const Text(
+                "Task Brancher",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ])),
+            Expanded(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  ListTile(
+                    title: const Text('Home'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      // Переход на домашнюю страницу
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Settings'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      // Переход на страницу настроек
+                    },
+                  ),
+                ],
+              ),
+            ),
+            // Нижняя часть drawer с номером версии
+            ListTile(
+              title: const Text('Version 1.0.0'),
+              onTap: () {
+                Navigator.pop(context);
+                // Действие при нажатии на номер версии
+              },
+            ),
+            // Container(
+            //   padding: const EdgeInsets.all(10),
+            //   child: Column(
+            //     children: [
+            //       const SizedBox(height: 40),
+            //       Container(
+            //         margin: const EdgeInsets.only(bottom: 10),
+            //         child: Column(children: [
+            //           Image.asset(
+            //             'assets/images/logo.png',
+            //             width: 64,
+            //             height: 64,
+            //           ),
+            //           const Text(
+            //             "Task Brancher",
+            //             style: TextStyle(
+            //                 fontSize: 20, fontWeight: FontWeight.bold),
+            //           ),
+            //         ]),
+            //       ),
+            //       const SizedBox(height: 20),
+            //       ListView(
+            //         shrinkWrap: true,
+            //         children: [
+            //           ListTile(
+            //             leading: const Icon(Icons.settings),
+            //             title: const Text("Настройки"),
+            //             onTap: () => Navigator.of(context).pop(),
+            //           ),
+            //         ],
+            //       ),
+            //       Expanded(
+            //         child: Column(
+            //           mainAxisAlignment: MainAxisAlignment.end,
+            //           children: [
+            //             Text("Версия 0.1.0",
+            //                 style: AppTheme.appTextStyle('BodyText')),
+            //           ],
+            //         ),
+            //       )
+            // TextButton(
+            //   onPressed: () {
+            //     HiveService.clearAllBox();
+            //     Navigator.of(context).pop();
+            //   },
+            //   child: Text(
+            //     "Очистить базу данных",
+            //     style: AppTheme.appTextStyle('BodyText'),
+            //   ),
+            // ),
+            //    ],
+            //  ),
+            //  ),
+          ],
+        ),
+      ),
+
+      // плавающая кнопка добавления проекта **********************************
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppTheme.appColor('Accent'),
@@ -38,12 +152,14 @@ class _MyHomePageState extends State<HomeScreen> {
               title: "",
               description: "",
               parentId: "",
+              projectId: "",
+              children: [],
               number: (projects.length + 1).toString());
           // Показать форму для добавления проекта
           final result = await projectEditForm(context, newProject);
           if (result) {
             // Добавить проект
-            HiveService.create(newProject);
+            HiveService.createObject(newProject);
             setState(() {});
           }
         },
@@ -53,6 +169,8 @@ class _MyHomePageState extends State<HomeScreen> {
           color: Colors.white,
         ),
       ),
+
+      //Подвал ****************************************************************
       bottomNavigationBar: BottomAppBar(
         height: 64,
         elevation: 0,
@@ -71,8 +189,9 @@ class _MyHomePageState extends State<HomeScreen> {
               ),
               onPressed: () {
                 if (global.currentProject != null) {
-                  Navigator.of(context)
-                      .pushNamed('/kanban', arguments: global.currentProject);
+                  global.navigateToScreen(context, routeName: '/kanban');
+                  // Navigator.of(context)
+                  //     .pushNamed('/kanban', arguments: global.currentProject);
                 }
               },
             ),
@@ -86,14 +205,17 @@ class _MyHomePageState extends State<HomeScreen> {
               ),
               onPressed: () {
                 if (global.currentProject != null) {
-                  Navigator.of(context)
-                      .pushNamed('/tasks', arguments: global.currentProject);
+                  global.navigateToScreen(context, routeName: '/tasks');
+                  // Navigator.of(context)
+                  //     .pushNamed('/tasks', arguments: global.currentProject);
                 }
               },
             ),
           ],
         ),
       ),
+
+      //Тело ******************************************************************
       body: Column(
         children: [
           Container(
@@ -119,9 +241,19 @@ class _MyHomePageState extends State<HomeScreen> {
                       foregroundColor: Colors.white,
                       icon: Icons.delete,
                       label: 'Удалить',
-                      onPressed: (context) {
+                      onPressed: (context) async {
                         // Удалить проект
-                        projects.removeAt(index);
+                        bool result = await confirmDelete(context,
+                            title: "Удалить проект?",
+                            message:
+                                "При удалении прокта: ${projects[index].title} будут удалены все его подзадачи.");
+
+                        //bool result = await confirmDelete(context);
+                        if (!result) {
+                          return;
+                        }
+                        HiveService.deleteObject(projects[index]);
+
                         //Обновить список
                         setState(() {});
                       },
@@ -141,7 +273,7 @@ class _MyHomePageState extends State<HomeScreen> {
                           if (result) {
                             // Сохранить изменения
                             //HiveService.addProject(result);
-                            HiveService.update(projects[index]);
+                            HiveService.updateObject(projects[index]);
                             // Обновить список
                             setState(() {});
                           }
@@ -159,13 +291,10 @@ class _MyHomePageState extends State<HomeScreen> {
                         setState(() {});
                       } else {
                         // Открыть окно вложенных задач
-                        Navigator.of(context)
-                            .pushNamed('/tasks', arguments: projects[index]);
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: (context) =>
-                        //             TasksListScreen(parent: projects[index])));
+                        global.navigateToScreen(context,
+                            routeName: '/tasks', arguments: projects[index]);
+                        // Navigator.of(context)
+                        //     .pushNamed('/tasks', arguments: projects[index]);
                       }
                     },
                   ),
@@ -178,6 +307,7 @@ class _MyHomePageState extends State<HomeScreen> {
     );
   }
 
+  //Форма редактирования карточки проекта
   Future<bool> projectEditForm(BuildContext context, Project project) async {
     //контроллеры для ввода c установленными начальными значениями
     final nameController = TextEditingController(text: project.title);
@@ -229,12 +359,10 @@ class _MyHomePageState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       TextButton(
-                        child: const Text(
-                          'Отмена',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 18,
-                          ),
+                        child: Text(
+                          'ОТМЕНА',
+                          style: AppTheme.buttonTextStyle(
+                              color: AppTheme.appColor('CancelButton')),
                         ),
                         onPressed: () async {
                           result = false;
@@ -243,9 +371,10 @@ class _MyHomePageState extends State<HomeScreen> {
                         },
                       ),
                       TextButton(
-                        child: const Text(
-                          'Сохранить',
-                          style: TextStyle(color: Colors.green, fontSize: 18),
+                        child: Text(
+                          'СОХРАНИТЬ',
+                          style: AppTheme.buttonTextStyle(
+                              color: AppTheme.appColor('OkButton')),
                         ),
                         onPressed: () {
                           // Сохранить изменения
@@ -264,6 +393,52 @@ class _MyHomePageState extends State<HomeScreen> {
       },
     );
 
+    return result;
+  }
+
+  Future<bool> confirmDelete(BuildContext context,
+      {required String title, required String message}) async {
+    //Для результата
+    bool result = false;
+    //Откроем диалоговое окно и дождемся его закрытия
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  //Зафиксируем ответ
+                  result = true;
+                  //Закроем окно диалога
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'УДАЛИТЬ',
+                  style: AppTheme.buttonTextStyle(
+                      color: AppTheme.appColor('CancelButton')),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  //Зафиксируем ответ
+                  result = false;
+                  //Закроем окно диалога
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'ОТМЕНА',
+                  style: AppTheme.buttonTextStyle(
+                      color: AppTheme.appColor('OkButton')),
+                ),
+              ),
+            ],
+          );
+        }); //showDialog
+
+    //Вернем результат выбора
     return result;
   }
 }

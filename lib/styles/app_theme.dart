@@ -34,6 +34,12 @@ class AppTheme {
         return isCard
             ? appColors['StatusCalceledCard']!
             : appColors['StatusCalceled']!;
+      case Status.hidden:
+        return isCard
+            ? appColors['StatusHiddenCard']!
+            : appColors['StatusHidden']!;
+      default:
+        return Colors.red;
     }
   }
 
@@ -51,5 +57,10 @@ class AppTheme {
   static TextStyle statusTextStyle(Status status) {
     return TextStyle(
         fontSize: 16, fontWeight: FontWeight.bold, color: statusColor(status));
+  }
+
+  //Стиль текстовых кнопок
+  static TextStyle buttonTextStyle({Color color = Colors.black}) {
+    return appTextStyle('ButtonText').copyWith(color: color);
   }
 }

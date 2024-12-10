@@ -6,10 +6,12 @@ class Task extends Base {
   bool visible = true;
 
   Task(
-      {required super.title,
-      required super.description,
+      {required super.projectId,
       required super.parentId,
+      required super.title,
+      required super.description,
       required super.number,
+      required super.children,
       super.id,
       this.status = Status.none,
       this.visible = true});
@@ -18,24 +20,30 @@ class Task extends Base {
   factory Task.fromJson(Map<dynamic, dynamic> json) {
     return Task(
         id: json['id'],
+        projectId: json['projectId'],
         parentId: json['parentId'],
         title: json['title'],
         description: json['description'],
         number: json['number'],
+        children: json['children'],
         status: Status.values.byName(json['status']),
         visible: json['visible']);
   }
 
   @override
-  Map<String, dynamic> tojson() => {
+  Map<String, dynamic> toJson() => {
         'id': id,
+        'projectId': projectId,
+        'parentId': parentId,
         'title': title,
         'description': description,
-        'parentId': parentId,
         'number': number,
+        'children': children,
         'status': status.name,
         'visible': visible,
       };
 
   String getStatusName() => status.name;
+
+  int getChildConunt() => children.length;
 }

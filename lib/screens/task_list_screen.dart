@@ -18,42 +18,48 @@ class _TasksListScreenState extends State<TasksListScreen> {
   @override
   void initState() {
     super.initState();
+    //Задаем текущий проект как первоначальноезначение родителя для списка
     parent = widget.project;
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Task> tasks = HiveService.getChildren(parent!.id);
+    List<Task> tasks = HiveService.getTasksList(parent!);
 
     return PopScope(
+      //Для контроля системной кнопки назад
       canPop: false,
       onPopInvokedWithResult: (didPop, result) => goBackScreen(context),
       child: Scaffold(
-        // ignore: prefer_const_constructors
+        // Цвет фона
         backgroundColor: AppTheme.appColor('Background'),
+        // опция для выталкивания клавиатурой bottomSheet виджета
+        resizeToAvoidBottomInset: true,
+
+        //Шапка ****************************************************************
         appBar: AppBar(
           backgroundColor: AppTheme.appColor('Background'),
-          centerTitle: true,
+          //centerTitle: true,
           leading: IconButton(
             onPressed: () {
               goBackScreen(context);
             },
+            // ignore: prefer_const_constructors
             icon: Icon(
               Icons.arrow_back_ios,
               color: Colors.black,
             ),
           ),
           title: const Text(
-            "Подзадачи",
+            "Список подзадач",
             style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.normal,
                 color: Colors.black),
           ),
         ),
-        // опция для выталкивания клавиатурой bottomSheet виджета
-        resizeToAvoidBottomInset: true,
-        // плавающая кнопка добавления проекта
+
+        //Плавающая кнопка ******************************************************
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
           backgroundColor: AppTheme.appColor('Accent2'),
@@ -62,13 +68,15 @@ class _TasksListScreenState extends State<TasksListScreen> {
           onPressed: () async {
             var newTask = Task(
                 parentId: parent!.id,
+                projectId: widget.project.id,
                 title: "",
                 description: "",
+                children: [],
                 number: "${parent!.number}.${(tasks.length + 1).toString()}");
             // Показать форму для добавления задачи
             final result = await taskEditForm(context, newTask);
             if (result) {
-              HiveService.create(newTask);
+              HiveService.createObject(newTask);
               setState(() {});
             }
           },
@@ -79,6 +87,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
           ),
         ),
 
+        //Подвал ****************************************************************
         bottomNavigationBar: BottomAppBar(
           height: 64,
           elevation: 0,
@@ -96,7 +105,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
                   ),
                   onPressed: () {
                     //Navigator.pop(context);
-                    navigateToScreen(context, '/home');
+                    global.navigateToScreen(context, routeName: '/home');
                   }),
               const SizedBox(width: 24),
               IconButton(
@@ -108,7 +117,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
                 ),
                 onPressed: () {
                   if (global.currentProject != null) {
-                    navigateToScreen(context, '/kanban');
+                    global.navigateToScreen(context, routeName: '/kanban');
                     // Navigator.of(context)
                     //     .pushNamed('/kanban', arguments: widget.project);
                   }
@@ -118,6 +127,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
           ),
         ),
 
+        //Центральная часть экрана **********************************************
         body: Column(
           children: [
             Container(
@@ -140,6 +150,12 @@ class _TasksListScreenState extends State<TasksListScreen> {
               child: ListView.builder(
                 itemCount: tasks.length,
                 itemBuilder: (context, index) {
+                  
+                  // Пропустить карточку если статус задачи "Скрыто"
+                  if (tasks[index].status == Status.hidden) {
+                    return Container();
+                  }
+                  // Выводим карточку задачи
                   return Slidable(
                     key: ValueKey(index),
                     startActionPane:
@@ -153,7 +169,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
                         onPressed: (context) {
                           // Удалить проект
                           //tasks.removeAt(index);
-                          HiveService.delete(tasks[index]);
+                          HiveService.deleteObject(tasks[index]);
                           //Обновить список
                           setState(() {});
                         },
@@ -172,7 +188,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
                                 await taskEditForm(context, tasks[index]);
                             if (result) {
                               //Сохранить изменения
-                              HiveService.update(tasks[index]);
+                              HiveService.updateObject(tasks[index]);
                               // Обновить список
                               setState(() {});
                             }
@@ -200,25 +216,12 @@ class _TasksListScreenState extends State<TasksListScreen> {
     );
   }
 
-  void navigateToScreen(BuildContext context, String routeName) {
-    Navigator.of(context).popUntil((route) {
-      if (route.isFirst) {
-        if (route.settings.name != routeName) {
-          Navigator.of(context).pushNamed(routeName, arguments: widget.project);
-        }
-        return true;
-      }
-      return route.settings.name ==
-          routeName; // Удаляем все маршруты, не соответствующие заданному имени
-    });
-  }
-
   void goBackScreen(BuildContext context) {
     if (parent!.parentId == "") {
-      navigateToScreen(context, '/');
+      global.navigateToScreen(context, routeName: '/');
     } else {
-      parent = HiveService.getObjectById(
-          parent!.parentId); //HiveService.getTask(parent!.parentId);
+      //Переход к предыдущему списку путем указания родителя для родителя этого списка
+      parent = HiveService.getObjectById(parent!.parentId);
       setState(() {});
     }
   }
@@ -273,9 +276,11 @@ class _TasksListScreenState extends State<TasksListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       TextButton(
-                        child: const Text(
+                        child: Text(
                           'Отмена',
-                          style: TextStyle(color: Colors.grey, fontSize: 18),
+                          style: TextStyle(
+                              color: AppTheme.appColor('CancelButton'),
+                              fontSize: 18),
                         ),
                         onPressed: () async {
                           result = false;
@@ -284,9 +289,11 @@ class _TasksListScreenState extends State<TasksListScreen> {
                         },
                       ),
                       TextButton(
-                        child: const Text(
+                        child: Text(
                           'Сохранить',
-                          style: TextStyle(color: Colors.green, fontSize: 18),
+                          style: TextStyle(
+                              color: AppTheme.appColor('OkButton'),
+                              fontSize: 18),
                         ),
                         onPressed: () {
                           // Сохранить изменения

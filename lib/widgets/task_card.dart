@@ -16,40 +16,54 @@ class TaskCard extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           color: AppTheme.appColor('SelectedCard'),
           border: Border.all(color: AppTheme.appColor('Srtoke'), width: 1)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          height: 22,
-          padding: const EdgeInsets.only(left: 5, right: 5),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(task.number, style: AppTheme.appTextStyle('Title')),
-              Text(task.getStatusName().toUpperCase(),
-                  style: AppTheme.statusTextStyle(task.status)),
-            ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //Заголовок
+          Container(
+            height: 22,
+            padding: const EdgeInsets.only(left: 5, right: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                //Номер
+                Text(task.number, style: AppTheme.appTextStyle('Title')),
+                //Статус
+                task.getChildConunt() == 0
+                    ? Text(task.status.title,
+                        style: AppTheme.statusTextStyle(task.status))
+                    : Text('ПОДЗАДАЧ | ${task.getChildConunt()}',
+                        style: AppTheme.statusTextStyle(task.status)
+                            .copyWith(color: Colors.grey[600])),
+              ],
+            ),
           ),
-        ),
-        Divider(
-            thickness: 1,
-            color: AppTheme.appColor('Accent2'),
-            indent: 5,
-            endIndent: 5),
-        Container(
-          height: 100,
-          padding: const EdgeInsets.only(left: 5, right: 5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(task.title, style: AppTheme.appTextStyle('Title')),
-              const SizedBox(height: 5),
-              Text(task.description,
-                  softWrap: true,
-                  maxLines: 3,
-                  style: AppTheme.appTextStyle('Description')),
-            ],
+
+          //Разделитель
+          Divider(
+              thickness: 1,
+              color: AppTheme.appColor('Accent2'),
+              indent: 5,
+              endIndent: 5),
+
+          //Описание
+          Container(
+            //height: 100,
+            padding: const EdgeInsets.only(left: 5, right: 5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(task.title, style: AppTheme.appTextStyle('Title')),
+                const SizedBox(height: 5),
+                Text(task.description,
+                    softWrap: true,
+                    maxLines: 3,
+                    style: AppTheme.appTextStyle('Description')),
+              ],
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

@@ -12,4 +12,6 @@ Map<String, TextStyle> appTextStyles = {
       fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),
   'BodyText': const TextStyle(
       fontSize: 14, fontWeight: FontWeight.normal, color: Colors.black),
+  'ButtonText': const TextStyle(
+      fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black),
 };

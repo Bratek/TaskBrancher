@@ -21,6 +21,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       onGenerateRoute: (settings) {
+        //Project project;
+        if (settings.arguments == null) {}
         switch (settings.name) {
           case '/':
             return MaterialPageRoute(builder: (context) => const HomeScreen());
