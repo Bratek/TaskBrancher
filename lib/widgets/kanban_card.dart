@@ -26,7 +26,7 @@ class KanbanCard extends StatelessWidget {
           Container(
             height: 22,
             padding: const EdgeInsets.only(left: 5, right: 5),
-            child: Text(task.number, style: AppTheme.appTextStyle('Title')),
+            child: Text(task.number, style: AppTheme.appTextStyle('BodyLight')),
           ),
 
           //Разделитель
@@ -49,7 +49,7 @@ class KanbanCard extends StatelessWidget {
                 Text(task.description,
                     softWrap: true,
                     //maxLines: 3,
-                    style: AppTheme.appTextStyle('Description')),
+                    style: AppTheme.appTextStyle('BodyLight')),
                 //Отступ
                 const SizedBox(height: 5),
 
@@ -57,30 +57,32 @@ class KanbanCard extends StatelessWidget {
                 Row(
                   //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    //Кнопка перехода в список подзадач для этой задачи
+                    (task.status != Status.none &&
+                            task.status != Status.inprogress)
+                        ? const SizedBox(width: 24)
+                        : IconButton(
+                            icon: Image.asset(
+                              'assets/images/tasks.png',
+                              width: 24,
+                              height: 24,
+                              color: AppTheme.statusColor(task.status),
+                            ),
+                            onPressed: () {
+                              if (global.currentProject != null) {
+                                global.navigateToScreen(context,
+                                    routeName: '/tasks', arguments: task);
+                                // Navigator.of(context)
+                                //     .pushNamed('tasks', arguments: widget.project);
+                              }
+                            },
+                          ),
                     const Expanded(
                         child: SizedBox(
                       width: 10,
                     )),
-                    // DropdownButton<Status>(
-                    //   borderRadius: BorderRadius.circular(10),
-                    //   value: task.status,
-                    //   items: global.appSettings.kanbanColumnList
-                    //       .map((Status status) {
-                    //     return DropdownMenuItem<Status>(
-                    //       value: status,
-                    //       child: Text(
-                    //         status.title,
-                    //         style: AppTheme.buttonTextStyle(
-                    //             color: AppTheme.statusColor(status)),
-                    //       ),
-                    //     );
-                    //   }).toList(),
-                    //   onChanged: (selStatus) {
-                    //     task.status = selStatus!;
-                    //     HiveService.updateObject(task);
-                    //     callbackFunction();
-                    //   },
-                    // ),
+
+                    //Кнопка подменю выбора статуса
                     PopupMenuButton(
                       initialValue: task.status,
                       elevation: 8,
@@ -93,33 +95,29 @@ class KanbanCard extends StatelessWidget {
                             color: AppTheme.statusColor(task.status)),
                         Text(
                           task.status.title,
-                          style: AppTheme.appTextStyle('BodyText').copyWith(
-                            color: AppTheme.statusColor(task.status),
-                          ),
+                          style: AppTheme.statusButtonTextStyle(task.status),
                         ),
                       ]),
-                      itemBuilder: (context) =>
-                          global.appSettings.kanbanColumnList
-                              .map(
-                                (status) => PopupMenuItem(
-                                  value: status,
-                                  child: Text(
-                                    status.title,
-                                    style: AppTheme.appTextStyle('BodyText')
-                                        .copyWith(
-                                      color: AppTheme.statusColor(status),
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
+                      itemBuilder: (context) => global
+                          .appSettings.kanbanColumnList
+                          .map(
+                            (status) => PopupMenuItem(
+                              value: status,
+                              child: Text(
+                                status.title,
+                                style: AppTheme.statusButtonTextStyle(status),
+                              ),
+                            ),
+                          )
+                          .toList(),
                       onSelected: (value) {
                         task.status = value;
-                        HiveService.updateObject(task);
+                        DataBase.update(task);
                         callbackFunction();
                       },
                     ),
 
+                    //Вертикальный разделитель
                     Container(
                       margin: const EdgeInsets.only(left: 15),
                       width: 1,
@@ -127,20 +125,17 @@ class KanbanCard extends StatelessWidget {
                       color: AppTheme.statusColor(task.status),
                     ),
 
+                    //Кнопка для перехода с следующему статусу
                     IconButton(
                       icon: Icon(
                         Icons.keyboard_arrow_right,
                         color: AppTheme.statusColor(task.status),
                       ),
-                      //iconAlignment: IconAlignment.end,
                       onPressed: () {
                         task.status = task.status.nextStatus;
-                        HiveService.updateObject(task);
+                        DataBase.update(task);
                         callbackFunction();
                       },
-                      // label: Text(task.status.nextStatusButtonText,
-                      //     style: AppTheme.buttonTextStyle(
-                      //         color: AppTheme.statusColor(task.status))),
                     ),
                   ],
                 ),

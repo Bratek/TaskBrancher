@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 Map<String, Color> appColors = {
-  'Accent': const Color(0xFF41B60A),
-  'Accent2': const Color(0xFFB66E0A),
-  'Accent3': const Color(0xFF0A6EB6),
+  'Accent': Colors.green, //Color(0xFF41B60A),
+  'Accent2': Colors.blue, //Color(0xFFB66E0A),
+  'Accent3': const Color(0xFFCFCFCF), //Color(0xFF0A6EB6),
 
   'Background': const Color(0xFFEDEDED),
   'Background2': const Color(0xFFD9D9D9),

@@ -13,11 +13,11 @@ class HomeScreen extends StatefulWidget {
 class _MyHomePageState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    var projects = HiveService.getProjectsList();
+    var projects = DataBase.getProjectsList();
     if (global.currentProject == null) {
       if (projects.isNotEmpty) {
         global.currentProject = projects[0];
-      } 
+      }
     }
 
     return Scaffold(
@@ -32,7 +32,7 @@ class _MyHomePageState extends State<HomeScreen> {
         //centerTitle: true,
         title: Text(
           "Список проектов",
-          style: AppTheme.appTextStyle('AppBar'),
+          style: AppTheme.appTextStyle('Title'),
         ),
       ),
 
@@ -41,14 +41,11 @@ class _MyHomePageState extends State<HomeScreen> {
         child: Column(
           children: [
             DrawerHeader(
-                // decoration: BoxDecoration(
-                //   //color: AppTheme.appColor('Accent3'),
-                // ),
                 child: Column(children: [
               Image.asset(
                 'assets/images/logo.png',
-                width: 64,
-                height: 64,
+                width: 48,
+                height: 48,
               ),
               const Text(
                 "Task Brancher",
@@ -159,7 +156,7 @@ class _MyHomePageState extends State<HomeScreen> {
           final result = await projectEditForm(context, newProject);
           if (result) {
             // Добавить проект
-            HiveService.createObject(newProject);
+            DataBase.create(newProject);
             setState(() {});
           }
         },
@@ -218,9 +215,10 @@ class _MyHomePageState extends State<HomeScreen> {
       //Тело ******************************************************************
       body: Column(
         children: [
+          //Разделитель
           Container(
             padding: const EdgeInsets.all(10),
-            height: 3,
+            height: 2,
             color: AppTheme.appColor('Accent'),
           ),
           //Отступ
@@ -243,16 +241,17 @@ class _MyHomePageState extends State<HomeScreen> {
                       label: 'Удалить',
                       onPressed: (context) async {
                         // Удалить проект
-                        bool result = await confirmDelete(context,
+                        bool result = await confirmDialog(context,
                             title: "Удалить проект?",
                             message:
-                                "При удалении прокта: ${projects[index].title} будут удалены все его подзадачи.");
+                                "При удалении проекта: \n${projects[index].title} \nбудут удалены все его подзадачи.",
+                            okButtonText: "Удалить",
+                            cancelButtonText: "Отмена");
 
-                        //bool result = await confirmDelete(context);
                         if (!result) {
                           return;
                         }
-                        HiveService.deleteObject(projects[index]);
+                        DataBase.delete(projects[index]);
 
                         //Обновить список
                         setState(() {});
@@ -273,7 +272,7 @@ class _MyHomePageState extends State<HomeScreen> {
                           if (result) {
                             // Сохранить изменения
                             //HiveService.addProject(result);
-                            HiveService.updateObject(projects[index]);
+                            DataBase.update(projects[index]);
                             // Обновить список
                             setState(() {});
                           }
@@ -393,52 +392,6 @@ class _MyHomePageState extends State<HomeScreen> {
       },
     );
 
-    return result;
-  }
-
-  Future<bool> confirmDelete(BuildContext context,
-      {required String title, required String message}) async {
-    //Для результата
-    bool result = false;
-    //Откроем диалоговое окно и дождемся его закрытия
-    await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(title),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  //Зафиксируем ответ
-                  result = true;
-                  //Закроем окно диалога
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  'УДАЛИТЬ',
-                  style: AppTheme.buttonTextStyle(
-                      color: AppTheme.appColor('CancelButton')),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  //Зафиксируем ответ
-                  result = false;
-                  //Закроем окно диалога
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  'ОТМЕНА',
-                  style: AppTheme.buttonTextStyle(
-                      color: AppTheme.appColor('OkButton')),
-                ),
-              ),
-            ],
-          );
-        }); //showDialog
-
-    //Вернем результат выбора
     return result;
   }
 }

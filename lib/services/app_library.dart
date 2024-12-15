@@ -11,12 +11,13 @@ export 'package:task_brancher/screens/kanban_screen.dart';
 export 'package:task_brancher/screens/task_list_screen.dart';
 
 //services
-export 'package:task_brancher/services/hive_service.dart';
+export 'package:task_brancher/services/data_base.dart';
 
-//widgets
+//widgetsß
 export 'package:task_brancher/widgets/project_card.dart';
 export 'package:task_brancher/widgets/task_card.dart';
 export 'package:task_brancher/widgets/kanban_card.dart';
+export 'package:task_brancher/widgets/confirm_dialog.dart';
 
 //styles
 export 'package:task_brancher/styles/app_theme.dart';

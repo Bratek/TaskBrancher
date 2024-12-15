@@ -14,7 +14,7 @@ class KanbanScreen extends StatefulWidget {
 class _KanbanScreenState extends State<KanbanScreen> {
   @override
   Widget build(BuildContext context) {
-    List<Task> kanban = HiveService.getKanbanList(widget.project);
+    List<Task> kanban = DataBase.getKanbanList(widget.project);
     Map<String, List<Task>> statusColumns = spreadList(kanban);
     var scrollController = ScrollController();
 
@@ -35,7 +35,7 @@ class _KanbanScreenState extends State<KanbanScreen> {
           ),
         ),
         title:
-            Text(widget.project.title, style: AppTheme.appTextStyle('AppBar')),
+            Text(widget.project.title, style: AppTheme.appTextStyle('Title')),
       ),
 
       //Плавающая кнопка  ****************************************************
@@ -92,6 +92,11 @@ class _KanbanScreenState extends State<KanbanScreen> {
       //Тело ******************************************************************
       body: Column(
         children: [
+          //Разделитель
+          Container(
+            color: AppTheme.appColor('Accent3'),
+            height: 2,
+          ),
           Expanded(
             //child: PageView(controller: pageController,
             child: Scrollbar(
@@ -137,6 +142,7 @@ class _KanbanScreenState extends State<KanbanScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          //Заголовок столбца
           Container(
             height: 26,
             width: cardWidth,
@@ -144,7 +150,8 @@ class _KanbanScreenState extends State<KanbanScreen> {
             color: AppTheme.statusColor(status, isCard: true),
             child: Center(
               child: Text(status.columnStatusText,
-                  style: AppTheme.statusTextStyle(status)),
+                  style:
+                      AppTheme.statusTextStyle(status).copyWith(fontSize: 18)),
             ),
           ),
           //Отступ

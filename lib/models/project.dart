@@ -11,7 +11,11 @@ class Project extends Base {
       required super.description,
       required super.number,
       required super.children,
-      this.visible = true});
+      this.visible = true}) {
+    if (projectId == "") {
+      projectId = id;
+    }
+  }
 
   @override
   factory Project.fromJson(Map<dynamic, dynamic> json) => Project(

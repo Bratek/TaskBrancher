@@ -4,9 +4,9 @@ import 'package:task_brancher/services/app_library.dart';
 import 'package:task_brancher/services/global.dart' as global;
 
 class TasksListScreen extends StatefulWidget {
-  final Project project;
+  final Base parent;
 
-  const TasksListScreen({super.key, required this.project});
+  const TasksListScreen({super.key, required this.parent});
 
   @override
   State<TasksListScreen> createState() => _TasksListScreenState();
@@ -19,12 +19,12 @@ class _TasksListScreenState extends State<TasksListScreen> {
   void initState() {
     super.initState();
     //Задаем текущий проект как первоначальноезначение родителя для списка
-    parent = widget.project;
+    parent = widget.parent;
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Task> tasks = HiveService.getTasksList(parent!);
+    List<Task> tasks = DataBase.getTasksList(parent!);
 
     return PopScope(
       //Для контроля системной кнопки назад
@@ -50,12 +50,9 @@ class _TasksListScreenState extends State<TasksListScreen> {
               color: Colors.black,
             ),
           ),
-          title: const Text(
+          title: Text(
             "Список подзадач",
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.normal,
-                color: Colors.black),
+            style: AppTheme.appTextStyle('Title'),
           ),
         ),
 
@@ -66,9 +63,18 @@ class _TasksListScreenState extends State<TasksListScreen> {
           elevation: 0,
           shape: const CircleBorder(),
           onPressed: () async {
+            //Разрешить создавать подзадачи только для статуса "Новый" или "В работе" родительской задачи
+            if (parent is Task) {
+              Task parentTask = parent as Task;
+              if (parentTask.status != Status.none &&
+                  parentTask.status != Status.inprogress) {
+                return;
+              }
+            }
+
             var newTask = Task(
                 parentId: parent!.id,
-                projectId: widget.project.id,
+                projectId: parent!.projectId,
                 title: "",
                 description: "",
                 children: [],
@@ -76,7 +82,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
             // Показать форму для добавления задачи
             final result = await taskEditForm(context, newTask);
             if (result) {
-              HiveService.createObject(newTask);
+              DataBase.create(newTask);
               setState(() {});
             }
           },
@@ -130,27 +136,26 @@ class _TasksListScreenState extends State<TasksListScreen> {
         //Центральная часть экрана **********************************************
         body: Column(
           children: [
+            //Разделитель
             Container(
               color: AppTheme.appColor('Accent2'),
-              height: 3,
+              height: 2,
             ),
+            //Родитель
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
               child: Text(
                 "${parent!.number}. ${parent!.title}",
                 textAlign: TextAlign.start,
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                style: AppTheme.appTextStyle('Body'),
               ),
             ),
+            //Список подзадач
             Expanded(
               child: ListView.builder(
                 itemCount: tasks.length,
                 itemBuilder: (context, index) {
-                  
                   // Пропустить карточку если статус задачи "Скрыто"
                   if (tasks[index].status == Status.hidden) {
                     return Container();
@@ -161,15 +166,13 @@ class _TasksListScreenState extends State<TasksListScreen> {
                     startActionPane:
                         ActionPane(motion: const BehindMotion(), children: [
                       SlidableAction(
-                        // An action can be bigger than the others.
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
                         icon: Icons.delete,
                         label: 'Удалить',
                         onPressed: (context) {
                           // Удалить проект
-                          //tasks.removeAt(index);
-                          HiveService.deleteObject(tasks[index]);
+                          DataBase.delete(tasks[index]);
                           //Обновить список
                           setState(() {});
                         },
@@ -188,7 +191,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
                                 await taskEditForm(context, tasks[index]);
                             if (result) {
                               //Сохранить изменения
-                              HiveService.updateObject(tasks[index]);
+                              DataBase.update(tasks[index]);
                               // Обновить список
                               setState(() {});
                             }
@@ -221,7 +224,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
       global.navigateToScreen(context, routeName: '/');
     } else {
       //Переход к предыдущему списку путем указания родителя для родителя этого списка
-      parent = HiveService.getObjectById(parent!.parentId);
+      parent = DataBase.getObjectById(parent!.parentId);
       setState(() {});
     }
   }

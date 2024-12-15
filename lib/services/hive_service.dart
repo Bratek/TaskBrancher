@@ -7,7 +7,11 @@ import 'package:task_brancher/models/status.dart';
 import 'package:task_brancher/services/global.dart' as global;
 
 class HiveService {
-  static init() async {
+  
+  // ################################################################## Внешние методы
+  //Инициализация
+  Future<void> init() async {
+    
     //Инициализация Hive
     await Hive.initFlutter();
 
@@ -21,10 +25,42 @@ class HiveService {
     global.appSettings = getSettings();
   }
 
+  //Создать объект
+  void create(Base model) {
+    _createObject(model);
+  }
+
+  //Обновить объект
+  void update(Base model) {
+    _updateObject(model);
+  }
+
+  //Удалить объект
+  void delete(Base model) {
+    _deleteObject(model);
+  }
+
+  //Получить список проектов
+  List<Project> getProjectsList() {
+    return _getProjectsList();
+  }
+
+  //Получить список задач
+  List<Task> getTasksList(Base parent) {
+    return _getTasksList(parent);
+  }
+
+  //Получить объект по id
+  Base? getObjectById(String id) {
+    var task = _getTaskById(id);
+    if (task != null) return task;
+    return _getProjectById(id)!;
+  }
+
 // ################################################################## CRUD
 
 //Добавить новый элемент в коробку -------------------------------------------------
-  static void createObject(Base model) {
+  void _createObject(Base model) {
     //Добавляем новую запись в коробку
     _putObject(model);
 
@@ -37,21 +73,14 @@ class HiveService {
     }
   }
 
-  //Получить объект по id
-  static Base? getObjectById(String id) {
-    var task = _getTaskById(id);
-    if (task != null) return task;
-    return _getProjectById(id)!;
-  }
-
   //Обновить элемент в коробке -------------------------------------------------
-  static void updateObject(Base model) {
+  void _updateObject(Base model) {
     //Обновляем запись в коробке
     _putObject(model);
   }
 
 //Удалить запись по объекту в коробке -------------------------------------------------
-  static void deleteObject(Base? model) {
+  void _deleteObject(Base? model) {
     if (model == null) return;
 
     if (model is Project) {
@@ -73,6 +102,9 @@ class HiveService {
       //Удаляем записи из канбана по списку
       deleteFromKanbanByList(childrenList);
 
+      //Удаляем запись о задаче из списка родителя
+      deleteChildFromParent(model);
+
       //Удаляем записи из коробки задач по списку
       deleteChildrenByList(childrenList);
 
@@ -84,26 +116,26 @@ class HiveService {
 // ################################################################## Box
 
   //Очистить все коробки -------------------------------------------------
-  static void clearAllBox() {
+  void clearAllBox() {
     clearBox("Project");
     clearBox("Task");
     clearBox("Kanban");
   }
 
-  static void clearBox(String boxName) {
+  void clearBox(String boxName) {
     //Очистка бокса
     _clearBoxByName(boxName);
   }
 
 //Очистить коробку по имени -------------------------------------------------
-  static void _clearBoxByName(String boxName) {
+  void _clearBoxByName(String boxName) {
     Hive.box(boxName).clear();
   }
 
 // ################################################################## Child
 
   //Добавляем поздадачу в родительский объект -------------------------------------------------
-  static void addChildToParent(Base child) {
+  void addChildToParent(Base child) {
     //Получаем объект родителя из коробки по id
     var parent = getObjectById(child.parentId);
     if (parent == null) return;
@@ -116,15 +148,16 @@ class HiveService {
     _putObject(parent);
   }
 
-  static void deleteChildFromParent(Base child) {
+  //Удалить дочерний элемент из списка дочерних элементов родителя
+  void deleteChildFromParent(Base child) {
     //Получаем объект родителя из коробки по id
     var parrent = getObjectById(child.parentId);
     if (parrent == null) return;
 
-    //Удаляем запись о дочернем элементе в объект родителя
+    //Удаляем запись о дочернем элементе из списка children родителя
     parrent.deleteChild(child);
 
-    //Помещаем объект родителя в коробку
+    //Сохраним объект родителя в коробку
     _putObject(parrent);
 
     //Добавим запись в канбан
@@ -134,7 +167,7 @@ class HiveService {
   }
 
 //Получить иерархический список всех подзадач
-  static List<Task> getAllChildren(Base model) {
+  List<Task> getAllChildren(Base model) {
     List<Task> list = [];
     if (model is Task) list.add(model);
     if (model.children.isEmpty) return list;
@@ -149,7 +182,8 @@ class HiveService {
     return list;
   }
 
-  static void deleteChildrenByList(List<Task> list) {
+  //Удаление задач по списку
+  void deleteChildrenByList(List<Task> list) {
     for (var element in list) {
       _deleteTaskById(element.id);
     }
@@ -157,20 +191,15 @@ class HiveService {
 
 // ################################################################## Project
 
-  //Получить список проектов
-  static List<Project> getProjectsList() {
-    return _getProjectsList();
-  }
-
   //Получить объект проекта по id
-  static Project? _getProjectById(String id) {
+  Project? _getProjectById(String id) {
     var box = Hive.box("Project");
     var json = box.get(id);
     return json == null ? null : Project.fromJson(json);
   }
 
   //Получить список проектов
-  static List<Project> _getProjectsList() {
+  List<Project> _getProjectsList() {
     List<Project> list = [];
     var box = Hive.box("Project");
     var projects = box.values.toList();
@@ -185,7 +214,7 @@ class HiveService {
   }
 
   //Создать/Обновить запись по объекту в коробке
-  static void _putObject(Base? model) {
+  void _putObject(Base? model) {
     if (model == null) return;
 
     var box = Hive.box(model.getType());
@@ -193,15 +222,20 @@ class HiveService {
   }
 
   //Удалить проект по id из коробки
-  static void _deleteProjectById(String id) {
+  void _deleteProjectById(String id) {
     var box = Hive.box("Project");
     box.delete(id);
+  }
+
+//Получить список для канбан
+  List<Task> getKanbanList(Project project) {
+    return _getKanbanList(project.id);
   }
 
 // ################################################################## Task
 
   //Получить список подзадач
-  static List<Task> getTasksList(Base parent) {
+  List<Task> _getTasksList(Base parent) {
     var parrent = getObjectById(parent.id);
     List<Task> list = [];
 
@@ -216,7 +250,7 @@ class HiveService {
   }
 
 //Получить объект задачи по id
-  static Task? _getTaskById(String? id) {
+  Task? _getTaskById(String? id) {
     if (id == null) return null;
 
     var box = Hive.box("Task");
@@ -226,7 +260,7 @@ class HiveService {
   }
 
   //Удалить задачу по id из коробки
-  static void _deleteTaskById(String id) {
+  void _deleteTaskById(String id) {
     var box = Hive.box("Task");
     box.delete(id);
   }
@@ -234,7 +268,7 @@ class HiveService {
 // ################################################################## Kanban
 
   //Обновим записи в канбане
-  static void addToKanban(Base? model) {
+  void addToKanban(Base? model) {
     if (model == null) return;
 
     //1. добавим текущую задачу в канбан
@@ -245,37 +279,33 @@ class HiveService {
   }
 
   //Добавить новую задачу в канбан
-  static void addTaskToKanban(Base model) {
+  void addTaskToKanban(Base model) {
     addTaskToKanbanById(model.projectId, model.id);
   }
 
   //Добавить новую задачу в канбан по id
-  static void addTaskToKanbanById(String projectId, String id) {
+  void addTaskToKanbanById(String projectId, String id) {
     var box = Hive.box("Kanban");
     List<String> values = box.get(projectId) ?? [];
     values.add(id);
     box.put(projectId, values);
   }
 
-  static List<Task> getKanbanList(Project project) {
-    return _getKanbanList(project.id);
-  }
-
 //Удалить задачи по списку из канбана
-  static void deleteFromKanbanByList(List<Task> list) {
+  void deleteFromKanbanByList(List<Task> list) {
     for (var element in list) {
       _deleteTaskFromKanbanById(element.projectId, element.id);
     }
   }
 
 //Удалить проект из канбана по id
-  static void _deleteProjectFromKanbanById(String projectId) {
+  void _deleteProjectFromKanbanById(String projectId) {
     var box = Hive.box("Kanban");
     box.delete(projectId);
   }
 
 //Удалить задачу из канбан по id
-  static void _deleteTaskFromKanbanById(String projectId, String taskId) {
+  void _deleteTaskFromKanbanById(String projectId, String taskId) {
     if (projectId == taskId) return;
 
     var box = Hive.box("Kanban");
@@ -285,7 +315,7 @@ class HiveService {
   }
 
 //Получить список задач канбана по id
-  static List<Task> _getKanbanList(String projectId) {
+  List<Task> _getKanbanList(String projectId) {
     var box = Hive.box("Kanban");
     var kanban = box.get(projectId) ?? [];
 
@@ -318,7 +348,7 @@ class HiveService {
   }
 
   //Сохранить настройки
-  static void saveSettings(Settings settings) {
+  void saveSettings(Settings settings) {
     var box = Hive.box("Settings");
     box.put("Settings", settings.toJson());
   }

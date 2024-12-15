@@ -27,12 +27,12 @@ class TaskCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 //Номер
-                Text(task.number, style: AppTheme.appTextStyle('Title')),
+                Text(task.number, style: AppTheme.appTextStyle('Body')),
                 //Статус
                 task.getChildConunt() == 0
                     ? Text(task.status.title,
                         style: AppTheme.statusTextStyle(task.status))
-                    : Text('ПОДЗАДАЧ | ${task.getChildConunt()}',
+                    : Text('ПОДЗАДАЧИ  |  ${task.getChildConunt()}',
                         style: AppTheme.statusTextStyle(task.status)
                             .copyWith(color: Colors.grey[600])),
               ],
@@ -46,19 +46,21 @@ class TaskCard extends StatelessWidget {
               indent: 5,
               endIndent: 5),
 
-          //Описание
+          //Данные задачи
           Container(
             //height: 100,
             padding: const EdgeInsets.only(left: 5, right: 5),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(task.title, style: AppTheme.appTextStyle('Title')),
+                //Заголовок
+                Text(task.title, style: AppTheme.appTextStyle('Body')),
                 const SizedBox(height: 5),
+                //Описание
                 Text(task.description,
                     softWrap: true,
                     maxLines: 3,
-                    style: AppTheme.appTextStyle('Description')),
+                    style: AppTheme.appTextStyle('BodyLight')),
               ],
             ),
           ),

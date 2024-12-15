@@ -5,7 +5,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   //Инициализация Hive
-  await HiveService.init();
+  await DataBase.init();
 
   //Запуск приложения
   runApp(const MyApp());
@@ -27,9 +27,9 @@ class MyApp extends StatelessWidget {
           case '/':
             return MaterialPageRoute(builder: (context) => const HomeScreen());
           case '/tasks':
-            Project project = settings.arguments as Project;
+            Base project = settings.arguments as Base;
             return MaterialPageRoute(
-                builder: (context) => TasksListScreen(project: project));
+                builder: (context) => TasksListScreen(parent: project));
           case '/kanban':
             Project project = settings.arguments as Project;
             return MaterialPageRoute(

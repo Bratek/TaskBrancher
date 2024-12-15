@@ -55,12 +55,16 @@ class AppTheme {
 
 //Стиль текста по статусу
   static TextStyle statusTextStyle(Status status) {
-    return TextStyle(
-        fontSize: 16, fontWeight: FontWeight.bold, color: statusColor(status));
+    return appTextStyle('Body').copyWith(color: statusColor(status));
+  }
+
+  //Стиль кнопки по статусу
+  static TextStyle statusButtonTextStyle(Status status) {
+    return buttonTextStyle(color: statusColor(status));
   }
 
   //Стиль текстовых кнопок
   static TextStyle buttonTextStyle({Color color = Colors.black}) {
-    return appTextStyle('ButtonText').copyWith(color: color);
+    return appTextStyle('Body').copyWith(color: color);
   }
 }

@@ -12,7 +12,7 @@ class ProjectCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 5, 10, 5),
       padding: const EdgeInsets.all(10),
-      height: 120,
+      //height: 120,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           color: inFocus
@@ -33,12 +33,12 @@ class ProjectCard extends StatelessWidget {
           endIndent: 5,
         ),
         Container(
-          height: 58,
+          height: 70,
           padding: const EdgeInsets.only(left: 5, right: 5),
           child: Text(project.description,
               softWrap: true,
-              maxLines: 3,
-              style: AppTheme.appTextStyle('Description')),
+              //maxLines: 3,
+              style: AppTheme.appTextStyle('BodyLight')),
         ),
       ]),
     );
