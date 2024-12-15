@@ -44,9 +44,10 @@ class _MyHomePageState extends State<HomeScreen> {
                 child: Column(children: [
               Image.asset(
                 'assets/images/logo.png',
-                width: 48,
-                height: 48,
+                width: 36,
+                height: 36,
               ),
+              SizedBox(height: 10),
               const Text(
                 "Task Brancher",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
