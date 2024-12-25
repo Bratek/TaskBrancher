@@ -1,3 +1,5 @@
 {
-    "editor.inlayHints.maximumLength": 0
+    "editor.inlayHints.maximumLength": 0,
+    "editor.formatOnSave": false,
+    "dart.lineLength": 120
 }

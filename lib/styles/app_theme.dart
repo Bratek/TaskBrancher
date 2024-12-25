@@ -65,6 +65,6 @@ class AppTheme {
 
   //Стиль текстовых кнопок
   static TextStyle buttonTextStyle({Color color = Colors.black}) {
-    return appTextStyle('Body').copyWith(color: color);
+    return appTextStyle('Body').copyWith(color: color, );
   }
 }

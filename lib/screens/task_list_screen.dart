@@ -22,9 +22,30 @@ class _TasksListScreenState extends State<TasksListScreen> {
     parent = widget.parent;
   }
 
+  void hundlerCreate(Task? task) {
+    if (task != null) {
+      DataBase.executeMetod(task, CRUD.create);
+    }
+    setState(() {});
+  }
+
+  void hundlerUpdate(Task? task) {
+    if (task != null) {
+      DataBase.executeMetod(task, CRUD.update);
+    }
+    setState(() {});
+  }
+
+  void _onDrawerClosed() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Task> tasks = DataBase.getTasksList(parent!);
+    List<Status> taskStatusList = DataBase.getSettings().taskStatusList;
 
     return PopScope(
       //Для контроля системной кнопки назад
@@ -35,7 +56,8 @@ class _TasksListScreenState extends State<TasksListScreen> {
         backgroundColor: AppTheme.appColor('Background'),
         // опция для выталкивания клавиатурой bottomSheet виджета
         resizeToAvoidBottomInset: true,
-
+        //Отключаем открытие drawer меню по свайпу
+        endDrawerEnableOpenDragGesture: false,
         //Шапка ****************************************************************
         appBar: AppBar(
           backgroundColor: AppTheme.appColor('Background'),
@@ -54,8 +76,27 @@ class _TasksListScreenState extends State<TasksListScreen> {
             "Список подзадач",
             style: AppTheme.appTextStyle('Title'),
           ),
+          actions: [
+            Builder(
+              builder: (context) {
+                return IconButton(
+                  icon: const Icon(Icons.settings),
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                );
+              },
+            ),
+          ],
         ),
-
+        endDrawer: Drawer(
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 15),
+              child: TaskListSettings(callbackMethod: _onDrawerClosed),
+            ),
+          ),
+        ),
         //Плавающая кнопка ******************************************************
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: FloatingActionButton(
@@ -66,8 +107,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
             //Разрешить создавать подзадачи только для статуса "Новый" или "В работе" родительской задачи
             if (parent is Task) {
               Task parentTask = parent as Task;
-              if (parentTask.status != Status.none &&
-                  parentTask.status != Status.inprogress) {
+              if (parentTask.status != Status.none && parentTask.status != Status.inprogress) {
                 return;
               }
             }
@@ -80,11 +120,20 @@ class _TasksListScreenState extends State<TasksListScreen> {
                 children: [],
                 number: "${parent!.number}.${(tasks.length + 1).toString()}");
             // Показать форму для добавления задачи
-            final result = await taskEditForm(context, newTask);
-            if (result) {
-              DataBase.create(newTask);
-              setState(() {});
-            }
+            appBottomSheet(
+                context,
+                taskEditForm(
+                  context,
+                  newTask,
+                  // (Task? task) {
+                  //   if (task != null) {
+                  //     DataBase.create(task);
+                  //   }
+                  //   setState(() {});
+                  //   return null;
+                  // },
+                  hundlerCreate,
+                ));
           },
           child: const Icon(
             Icons.add,
@@ -110,7 +159,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
                     size: 24,
                   ),
                   onPressed: () {
-                    //Navigator.pop(context);
+                    //Переход на главную
                     global.navigateToScreen(context, routeName: '/home');
                   }),
               const SizedBox(width: 24),
@@ -123,9 +172,8 @@ class _TasksListScreenState extends State<TasksListScreen> {
                 ),
                 onPressed: () {
                   if (global.currentProject != null) {
+                    //Переход на канбан
                     global.navigateToScreen(context, routeName: '/kanban');
-                    // Navigator.of(context)
-                    //     .pushNamed('/kanban', arguments: widget.project);
                   }
                 },
               ),
@@ -156,22 +204,31 @@ class _TasksListScreenState extends State<TasksListScreen> {
               child: ListView.builder(
                 itemCount: tasks.length,
                 itemBuilder: (context, index) {
-                  // Пропустить карточку если статус задачи "Скрыто"
-                  if (tasks[index].status == Status.hidden) {
+                  // Пропустить карточку если ее нет в настройках
+                  if (taskStatusList.contains(tasks[index].status) == false) {
                     return Container();
                   }
+
                   // Выводим карточку задачи
                   return Slidable(
                     key: ValueKey(index),
-                    startActionPane:
-                        ActionPane(motion: const BehindMotion(), children: [
+                    startActionPane: ActionPane(motion: const BehindMotion(), children: [
                       SlidableAction(
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
                         icon: Icons.delete,
                         label: 'Удалить',
-                        onPressed: (context) {
-                          // Удалить проект
+                        onPressed: (context) async {
+                          // Удалить задачу
+                          bool result = await confirmDialog(context,
+                              title: "Удалить задачу?",
+                              message: "При удалении задачи, будут удалены все его подзадачи.",
+                              okButtonText: "Удалить",
+                              cancelButtonText: "Отмена");
+
+                          if (!result) {
+                            return;
+                          }
                           DataBase.delete(tasks[index]);
                           //Обновить список
                           setState(() {});
@@ -186,15 +243,27 @@ class _TasksListScreenState extends State<TasksListScreen> {
                           foregroundColor: Colors.white,
                           icon: Icons.edit,
                           label: 'Изменить',
-                          onPressed: (context) async {
-                            final result =
-                                await taskEditForm(context, tasks[index]);
-                            if (result) {
-                              //Сохранить изменения
-                              DataBase.update(tasks[index]);
-                              // Обновить список
-                              setState(() {});
-                            }
+                          onPressed: (context) {
+                            // Показать форму для редактирования
+                            appBottomSheet(
+                              context,
+                              taskEditForm(
+                                context,
+                                tasks[index],
+                                hundlerUpdate,
+                              ),
+                              // taskEditForm(
+                              //   context,
+                              //   tasks[index],
+                              //   (Task? task) {
+                              //     if (task != null) {
+                              //       //Обновить список
+                              //       DataBase.update(task);
+                              //     }
+                              //     setState(() {});
+                              //     return null;
+                              //   },
+                            );
                           },
                         ),
                       ],
@@ -229,92 +298,92 @@ class _TasksListScreenState extends State<TasksListScreen> {
     }
   }
 
-  Future<bool> taskEditForm(BuildContext context, Task task) async {
-    //контроллеры для ввода c установленными начальными значениями
-    final titleController = TextEditingController(text: task.title);
-    final descriptionController = TextEditingController(text: task.description);
-    bool result = false;
-
+  void appBottomSheet(
+    BuildContext context,
+    WidgetBuilder body,
+  ) async {
     await showModalBottomSheet(
       isScrollControlled: true,
       context: context,
-      builder: (BuildContext context) {
-        //отрисовываем виджеты формы
-        return Container(
-          height: 300,
-          margin: EdgeInsets.only(
-              bottom: MediaQuery.of(context)
-                  .viewInsets
-                  .bottom), // нижний отступ для отталкивания от клавиатуры
-          padding: const EdgeInsets.all(20),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                TextField(
-                  //autofocus: true,
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Заголовок',
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                TextField(
-                  controller: descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Описание',
-                  ),
-                  keyboardType: TextInputType.multiline,
-                  minLines: 1,
-                  maxLines: 3,
-                  //maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                ),
-                const SizedBox(height: 10),
-
-                //кнопки
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        child: Text(
-                          'Отмена',
-                          style: TextStyle(
-                              color: AppTheme.appColor('CancelButton'),
-                              fontSize: 18),
-                        ),
-                        onPressed: () async {
-                          result = false;
-                          // закрыть форму
-                          Navigator.pop(context);
-                        },
-                      ),
-                      TextButton(
-                        child: Text(
-                          'Сохранить',
-                          style: TextStyle(
-                              color: AppTheme.appColor('OkButton'),
-                              fontSize: 18),
-                        ),
-                        onPressed: () {
-                          // Сохранить изменения
-                          task.title = titleController.text;
-                          task.description = descriptionController.text;
-                          result = true;
-                          // закрыть форму
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ]),
-              ],
-            ),
-          ),
-        );
-      },
+      builder: body,
     );
+  }
 
-    return result;
+  WidgetBuilder taskEditForm(
+    BuildContext context,
+    Task task,
+    Function(Task? task) callbackFunction,
+  ) {
+    return (BuildContext context) {
+      //контроллеры для ввода c установленными начальными значениями
+      final titleController = TextEditingController(text: task.title);
+      final descriptionController = TextEditingController(text: task.description);
+      //отрисовываем виджеты формы
+      return Container(
+        height: 300,
+        margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom), // нижний отступ для отталкивания от клавиатуры
+        padding: const EdgeInsets.all(20),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                //autofocus: true,
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Заголовок',
+                ),
+              ),
+
+              const SizedBox(height: 10),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Описание',
+                ),
+                keyboardType: TextInputType.multiline,
+                minLines: 1,
+                maxLines: 3,
+                //maxLengthEnforcement: MaxLengthEnforcement.enforced,
+              ),
+              const SizedBox(height: 10),
+
+              //кнопки
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                TextButton(
+                  child: Text(
+                    'ОТМЕНА',
+                    style: AppTheme.buttonTextStyle(color: AppTheme.appColor('CancelButton')),
+                  ),
+                  onPressed: () {
+                    //result = false;
+                    callbackFunction(null);
+                    // закрыть форму
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text(
+                    'СОХРАНИТЬ',
+                    style: AppTheme.buttonTextStyle(color: AppTheme.appColor('OkButton')),
+                  ),
+                  onPressed: () {
+                    // Сохранить изменения
+                    task.title = titleController.text;
+                    task.description = descriptionController.text;
+                    //result = true;
+                    callbackFunction(task);
+                    // закрыть форму
+                    Navigator.pop(context);
+                  },
+                ),
+              ]),
+            ],
+          ),
+        ),
+      );
+    };
   }
 }

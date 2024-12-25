@@ -7,11 +7,9 @@ import 'package:task_brancher/models/status.dart';
 import 'package:task_brancher/services/global.dart' as global;
 
 class HiveService {
-  
   // ################################################################## Внешние методы
   //Инициализация
   Future<void> init() async {
-    
     //Инициализация Hive
     await Hive.initFlutter();
 
@@ -161,7 +159,7 @@ class HiveService {
     _putObject(parrent);
 
     //Добавим запись в канбан
-    if (parrent is Task && parrent.getChildrenCount() == 0) {
+    if (parrent is Task && parrent.getChildCount() == 0) {
       addToKanban(parrent);
     }
   }
@@ -332,19 +330,31 @@ class HiveService {
 
   // ################################################################## Settings
   //Получить настройки
-  static Settings getSettings() {
+  Settings getSettings() {
     var box = Hive.box("Settings");
     var json = box.get("Settings");
     return json == null
-        ? Settings(kanbanColumnList: [
-            Status.none,
-            Status.inprogress,
-            Status.verify,
-            Status.completed,
-            Status.calceled,
-            Status.hidden
-          ])
+        ? Settings(
+            kanbanStatusList: [
+              Status.none,
+              Status.inprogress,
+              Status.verify,
+              Status.completed,
+              Status.calceled,
+              Status.hidden
+            ],
+            taskStatusList: [
+              Status.none,
+              Status.inprogress,
+              Status.verify,
+              Status.completed,
+              Status.calceled,
+              Status.hidden
+            ],
+          )
         : Settings.fromJson(json);
+
+    //Status.values.byName(json['status'] ?? 'none')
   }
 
   //Сохранить настройки

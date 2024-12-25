@@ -2,9 +2,6 @@ import 'package:task_brancher/models/base.dart';
 import 'package:task_brancher/models/status.dart';
 
 class Task extends Base {
-  Status status;
-  bool visible = true;
-
   Task(
       {required super.projectId,
       required super.parentId,
@@ -13,10 +10,8 @@ class Task extends Base {
       required super.number,
       required super.children,
       super.id,
-      this.status = Status.none,
-      this.visible = true});
+      super.status = Status.none});
 
-  @override
   factory Task.fromJson(Map<dynamic, dynamic> json) {
     return Task(
         id: json['id'],
@@ -26,8 +21,7 @@ class Task extends Base {
         description: json['description'],
         number: json['number'],
         children: json['children'],
-        status: Status.values.byName(json['status']),
-        visible: json['visible']);
+        status: Status.values.byName(json['status'] ?? 'none'));
   }
 
   @override
@@ -40,10 +34,5 @@ class Task extends Base {
         'number': number,
         'children': children,
         'status': status.name,
-        'visible': visible,
       };
-
-  String getStatusName() => status.name;
-
-  int getChildConunt() => children.length;
 }

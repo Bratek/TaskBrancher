@@ -6,8 +6,7 @@ class KanbanCard extends StatelessWidget {
   final Task task;
   final VoidCallback callbackFunction;
 
-  const KanbanCard(
-      {super.key, required this.task, required this.callbackFunction});
+  const KanbanCard({super.key, required this.task, required this.callbackFunction});
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +29,7 @@ class KanbanCard extends StatelessWidget {
           ),
 
           //Разделитель
-          Divider(
-              thickness: 1,
-              color: AppTheme.statusColor(task.status),
-              indent: 5,
-              endIndent: 5),
+          Divider(thickness: 1, color: AppTheme.statusColor(task.status), indent: 5, endIndent: 5),
           Container(
             //height: 100,
             padding: const EdgeInsets.only(left: 5, right: 5),
@@ -58,8 +53,7 @@ class KanbanCard extends StatelessWidget {
                   //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     //Кнопка перехода в список подзадач для этой задачи
-                    (task.status != Status.none &&
-                            task.status != Status.inprogress)
+                    (task.status != Status.none && task.status != Status.inprogress)
                         ? const SizedBox(width: 24)
                         : IconButton(
                             icon: Image.asset(
@@ -70,8 +64,7 @@ class KanbanCard extends StatelessWidget {
                             ),
                             onPressed: () {
                               if (global.currentProject != null) {
-                                global.navigateToScreen(context,
-                                    routeName: '/tasks', arguments: task);
+                                global.navigateToScreen(context, routeName: '/tasks', arguments: task);
                                 // Navigator.of(context)
                                 //     .pushNamed('tasks', arguments: widget.project);
                               }
@@ -91,15 +84,13 @@ class KanbanCard extends StatelessWidget {
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       ),
                       child: Row(children: [
-                        Icon(Icons.arrow_drop_down,
-                            color: AppTheme.statusColor(task.status)),
+                        Icon(Icons.arrow_drop_down, color: AppTheme.statusColor(task.status)),
                         Text(
                           task.status.title,
                           style: AppTheme.statusButtonTextStyle(task.status),
                         ),
                       ]),
-                      itemBuilder: (context) => global
-                          .appSettings.kanbanColumnList
+                      itemBuilder: (context) => global.appSettings.kanbanStatusList
                           .map(
                             (status) => PopupMenuItem(
                               value: status,

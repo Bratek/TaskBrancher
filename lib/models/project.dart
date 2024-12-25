@@ -1,32 +1,32 @@
 import 'package:task_brancher/models/base.dart';
+import 'package:task_brancher/models/status.dart';
 
 class Project extends Base {
-  bool visible = true;
-
   Project(
-      {super.id,
-      required super.projectId,
+      {required super.projectId,
       required super.parentId,
       required super.title,
       required super.description,
       required super.number,
       required super.children,
-      this.visible = true}) {
+      super.id,
+      super.status = Status.none}) {
     if (projectId == "") {
       projectId = id;
     }
   }
 
-  @override
-  factory Project.fromJson(Map<dynamic, dynamic> json) => Project(
-      id: json['id'],
-      projectId: json['projectId'],
-      parentId: json['parentId'],
-      title: json['title'],
-      description: json['description'],
-      number: json['number'],
-      visible: json['visible'],
-      children: json['children']);
+  factory Project.fromJson(Map<dynamic, dynamic> json) {
+    return Project(
+        id: json['id'],
+        projectId: json['projectId'],
+        parentId: json['parentId'],
+        title: json['title'],
+        description: json['description'],
+        number: json['number'],
+        children: json['children'],
+        status: Status.values.byName(json['status'] ?? "none"));
+  }
 
   @override
   Map<String, dynamic> toJson() => {
@@ -36,7 +36,7 @@ class Project extends Base {
         'title': title,
         'description': description,
         'number': number,
-        'visible': visible,
-        'children': children
+        'children': children,
+        'status': status.name,
       };
 }

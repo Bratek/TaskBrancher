@@ -29,10 +29,10 @@ class TaskCard extends StatelessWidget {
                 //Номер
                 Text(task.number, style: AppTheme.appTextStyle('Body')),
                 //Статус
-                task.getChildConunt() == 0
+                task.getChildCount() == 0
                     ? Text(task.status.title,
                         style: AppTheme.statusTextStyle(task.status))
-                    : Text('ПОДЗАДАЧИ  |  ${task.getChildConunt()}',
+                    : Text('ПОДЗАДАЧИ  |  ${task.getChildCount()}',
                         style: AppTheme.statusTextStyle(task.status)
                             .copyWith(color: Colors.grey[600])),
               ],

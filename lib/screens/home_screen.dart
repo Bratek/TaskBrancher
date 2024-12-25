@@ -47,6 +47,7 @@ class _MyHomePageState extends State<HomeScreen> {
                 width: 36,
                 height: 36,
               ),
+              // ignore: prefer_const_constructors
               SizedBox(height: 10),
               const Text(
                 "Task Brancher",
@@ -245,7 +246,7 @@ class _MyHomePageState extends State<HomeScreen> {
                         bool result = await confirmDialog(context,
                             title: "Удалить проект?",
                             message:
-                                "При удалении проекта: \n${projects[index].title} \nбудут удалены все его подзадачи.",
+                                "При удалении проекта, будут удалены все его подзадачи.",
                             okButtonText: "Удалить",
                             cancelButtonText: "Отмена");
 
