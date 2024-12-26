@@ -19,6 +19,7 @@ export 'package:task_brancher/widgets/task_card.dart';
 export 'package:task_brancher/widgets/kanban_card.dart';
 export 'package:task_brancher/widgets/confirm_dialog.dart';
 export 'package:task_brancher/widgets/task_list_settings.dart';
+export 'package:task_brancher/widgets/kanban_list_settings.dart';
 
 //styles
 export 'package:task_brancher/styles/app_theme.dart';

@@ -4,7 +4,7 @@ import 'package:task_brancher/models/project.dart';
 import 'package:task_brancher/models/settings.dart';
 import 'package:task_brancher/models/task.dart';
 import 'package:task_brancher/models/status.dart';
-import 'package:task_brancher/services/global.dart' as global;
+//import 'package:task_brancher/services/global.dart' as global;
 
 class HiveService {
   // ################################################################## Внешние методы
@@ -20,7 +20,7 @@ class HiveService {
     await Hive.openBox("Settings");
 
     //Получение сохраненых настроек
-    global.appSettings = getSettings();
+    //global.appSettings = getSettings();
   }
 
   //Создать объект

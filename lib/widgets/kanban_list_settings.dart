@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:task_brancher/services/app_library.dart';
 
-class TaskListSettings extends StatefulWidget {
-  
+class KanbanListSettings extends StatefulWidget {
   final VoidCallback? callbackMethod;
 
-  //Конструктор
-  const TaskListSettings({super.key, this.callbackMethod});
+  const KanbanListSettings({super.key, this.callbackMethod});
 
   @override
-  State<TaskListSettings> createState() => _TaskListSettingsState();
+  State<KanbanListSettings> createState() => _KanbanListSettingsState();
 }
 
-class _TaskListSettingsState extends State<TaskListSettings> {
+class _KanbanListSettingsState extends State<KanbanListSettings> {
   List<bool> selected = [];
 
   //Получить список настроек
   List<bool> getSettingsList() {
-    final taskStatusList = DataBase.getSettings().taskStatusList;
+    final kanbanStatusList = DataBase.getSettings().kanbanStatusList;
     return List.generate(Status.values.length, (index) {
-      return taskStatusList.contains(Status.values[index]) ? true : false;
+      return kanbanStatusList.contains(Status.values[index]) ? true : false;
     });
   }
 
@@ -29,12 +27,12 @@ class _TaskListSettingsState extends State<TaskListSettings> {
     Settings settings = DataBase.getSettings();
 
     //очистим текущий список
-    settings.taskStatusList.clear();
+    settings.kanbanStatusList.clear();
 
     //заполним новым списком
     for (int i = 0; i < Status.values.length; i++) {
       if (selected[i]) {
-        settings.taskStatusList.add(Status.values[i]);
+        settings.kanbanStatusList.add(Status.values[i]);
       }
     }
 

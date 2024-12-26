@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:task_brancher/services/app_library.dart';
 
 Project? currentProject;
-Settings appSettings = DataBase.getSettings();
+
 
 void navigateToScreen(BuildContext context,
     {required String routeName, Base? arguments}) {

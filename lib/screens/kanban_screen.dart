@@ -12,10 +12,22 @@ class KanbanScreen extends StatefulWidget {
 }
 
 class _KanbanScreenState extends State<KanbanScreen> {
+  //Процедура обновления канбан списка после закрытия drawer меню
+  void _onDrawerClosed() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    //Список задач для вывода в канбан
     List<Task> kanban = DataBase.getKanbanList(widget.project);
-    Map<String, List<Task>> statusColumns = spreadList(kanban);
+    //Получим словарь со списком задач для каждой колонки статуса
+    Map<Status, List<Task>> statusColumns = spreadList(kanban);
+    //Список статусов (колонок)
+    List<Status> kanbanStatusList = statusColumns.keys.toList();
+
     var scrollController = ScrollController();
 
     return Scaffold(
@@ -34,23 +46,56 @@ class _KanbanScreenState extends State<KanbanScreen> {
             color: Colors.black,
           ),
         ),
-        title:
-            Text(widget.project.title, style: AppTheme.appTextStyle('Title')),
+        title: Text(widget.project.title, style: AppTheme.appTextStyle('Title')),
+        actions: [
+          Builder(
+            builder: (context) {
+              return IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              );
+            },
+          ),
+        ],
       ),
-
-      //Плавающая кнопка  ****************************************************
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor: AppTheme.appColor('Accent3'),
-      //   elevation: 0,
-      //   shape: const CircleBorder(),
-      //   onPressed: () {},
-      //   child: const Icon(
-      //     Icons.swap_horiz,
-      //     size: 24,
-      //     color: Colors.white,
-      //   ),
-      // ),
+      endDrawer: Drawer(
+        child: SafeArea(
+            child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Text(
+                "Настройки канбан списка",
+                style: AppTheme.appTextStyle('Title'),
+              ),
+            ),
+            const Divider(
+              thickness: 1,
+              color: Colors.grey,
+              indent: 15,
+              endIndent: 15,
+            ),
+            SizedBox(
+              height: 350,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 15),
+                child: KanbanListSettings(callbackMethod: _onDrawerClosed),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "ЗАКРЫТЬ",
+                style: AppTheme.buttonTextStyle(color: AppTheme.appColor('OkButton')),
+              ),
+            ),
+          ],
+        )),
+      ),
 
       //Подвал ****************************************************************
       bottomNavigationBar: BottomAppBar(
@@ -63,8 +108,7 @@ class _KanbanScreenState extends State<KanbanScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-                icon: Icon(Icons.home,
-                    color: AppTheme.appColor('IconColor'), size: 24),
+                icon: Icon(Icons.home, color: AppTheme.appColor('IconColor'), size: 24),
                 onPressed: () {
                   global.navigateToScreen(context, routeName: '/');
                   //Navigator.pop(context);
@@ -104,20 +148,15 @@ class _KanbanScreenState extends State<KanbanScreen> {
               trackVisibility: true,
               controller: scrollController,
               interactive: true,
-              child: ListView(
-                  controller: scrollController,
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    statusList(context, statusColumns["none"]!, Status.none),
-                    statusList(context, statusColumns["inprogress"]!,
-                        Status.inprogress),
-                    statusList(
-                        context, statusColumns["verify"]!, Status.verify),
-                    statusList(
-                        context, statusColumns["completed"]!, Status.completed),
-                    statusList(
-                        context, statusColumns["calceled"]!, Status.calceled),
-                  ]),
+              child: ListView.builder(
+                controller: scrollController,
+                scrollDirection: Axis.horizontal,
+                itemCount: kanbanStatusList.length,
+                itemBuilder: (context, index) {
+                  Status status = kanbanStatusList[index];
+                  return statusList(context, statusColumns[status]!, status, kanbanStatusList);
+                },
+              ),
             ),
           )
         ],
@@ -125,8 +164,12 @@ class _KanbanScreenState extends State<KanbanScreen> {
     );
   }
 
-  Widget statusList(BuildContext context, List<Task> tasksList, Status status) {
+  //Отрисовка списка задач с указанным статусом
+  Widget statusList(BuildContext context, List<Task> taskList, Status status, List<Status> kanbanStatusList) {
+    //получение ширины экрана
     var sizeWidth = MediaQuery.of(context).size.width;
+
+    //ширина карточки списка в зависимости от ширины экрана
     var cardWidth = sizeWidth - 20;
     if (sizeWidth <= 904) {
       cardWidth = sizeWidth - 20;
@@ -135,6 +178,7 @@ class _KanbanScreenState extends State<KanbanScreen> {
     } else {
       cardWidth = (sizeWidth - 20) / 3;
     }
+
     return Container(
       width: cardWidth,
       padding: const EdgeInsets.only(left: 4, right: 4, top: 4),
@@ -149,9 +193,7 @@ class _KanbanScreenState extends State<KanbanScreen> {
             margin: const EdgeInsets.only(left: 10, right: 10),
             color: AppTheme.statusColor(status, isCard: true),
             child: Center(
-              child: Text(status.columnStatusText,
-                  style:
-                      AppTheme.statusTextStyle(status).copyWith(fontSize: 18)),
+              child: Text(status.columnStatusText, style: AppTheme.statusTextStyle(status).copyWith(fontSize: 18)),
             ),
           ),
           //Отступ
@@ -160,9 +202,10 @@ class _KanbanScreenState extends State<KanbanScreen> {
             child: ListView.builder(
               //shrinkWrap: true,
               //itemExtent: cardWidth,
-              itemCount: tasksList.length,
+              itemCount: taskList.length,
               itemBuilder: (context, index) => KanbanCard(
-                task: tasksList[index],
+                task: taskList[index],
+                kanbanStatusList: kanbanStatusList,
                 callbackFunction: () => setState(() {}),
               ),
             ),
@@ -172,35 +215,20 @@ class _KanbanScreenState extends State<KanbanScreen> {
     );
   }
 
-  Map<String, List<Task>> spreadList(kanban) {
-    List<Task> none = [];
-    List<Task> inprogress = [];
-    List<Task> verify = [];
-    List<Task> completed = [];
-    List<Task> calceled = [];
-    List<Task> hidden = [];
-    for (var task in kanban) {
-      if (task.status == Status.none) {
-        none.add(task);
-      } else if (task.status == Status.inprogress) {
-        inprogress.add(task);
-      } else if (task.status == Status.verify) {
-        verify.add(task);
-      } else if (task.status == Status.completed) {
-        completed.add(task);
-      } else if (task.status == Status.calceled) {
-        calceled.add(task);
-      } else {
-        hidden.add(task);
-      }
+  //Формирование списоков задач по статусам
+  Map<Status, List<Task>> spreadList(kanban) {
+    //Получим список статусов из настройки для канбана
+    List<Status> kanbanStatusList = DataBase.getSettings().kanbanStatusList;
+
+    //Создаем словарь со списком задач для каждого статуса
+    Map<Status, List<Task>> statusColumns = {};
+    for (var status in kanbanStatusList) {
+      statusColumns[status] = [];
     }
-    return {
-      "none": none,
-      "inprogress": inprogress,
-      "verify": verify,
-      "completed": completed,
-      "calceled": calceled,
-      "hidden": hidden,
-    };
+    //Добавляем задачи в соответствующий стаусу список
+    for (var task in kanban) {
+      statusColumns[task.status]?.add(task);
+    }
+    return statusColumns;
   }
 }

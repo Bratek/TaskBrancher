@@ -36,6 +36,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
     setState(() {});
   }
 
+  //Процедура обновления списка задач после закрытия drawer меню
   void _onDrawerClosed() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {});
@@ -91,11 +92,39 @@ class _TasksListScreenState extends State<TasksListScreen> {
         ),
         endDrawer: Drawer(
           child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 15),
-              child: TaskListSettings(callbackMethod: _onDrawerClosed),
-            ),
-          ),
+              child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Text(
+                  "Настройки списка задач",
+                  style: AppTheme.appTextStyle('Title'),
+                ),
+              ),
+              const Divider(
+                thickness: 1,
+                color: Colors.grey,
+                indent: 15,
+                endIndent: 15,
+              ),
+              SizedBox(
+                height: 350,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 15),
+                  child: TaskListSettings(callbackMethod: _onDrawerClosed),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  "ЗАКРЫТЬ",
+                  style: AppTheme.buttonTextStyle(color: AppTheme.appColor('OkButton')),
+                ),
+              ),
+            ],
+          )),
         ),
         //Плавающая кнопка ******************************************************
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -252,17 +281,6 @@ class _TasksListScreenState extends State<TasksListScreen> {
                                 tasks[index],
                                 hundlerUpdate,
                               ),
-                              // taskEditForm(
-                              //   context,
-                              //   tasks[index],
-                              //   (Task? task) {
-                              //     if (task != null) {
-                              //       //Обновить список
-                              //       DataBase.update(task);
-                              //     }
-                              //     setState(() {});
-                              //     return null;
-                              //   },
                             );
                           },
                         ),

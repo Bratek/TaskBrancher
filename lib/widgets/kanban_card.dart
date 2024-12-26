@@ -4,9 +4,10 @@ import 'package:task_brancher/services/global.dart' as global;
 
 class KanbanCard extends StatelessWidget {
   final Task task;
+  final List<Status> kanbanStatusList;
   final VoidCallback callbackFunction;
 
-  const KanbanCard({super.key, required this.task, required this.callbackFunction});
+  const KanbanCard({super.key, required this.task, required this.kanbanStatusList, required this.callbackFunction});
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +91,7 @@ class KanbanCard extends StatelessWidget {
                           style: AppTheme.statusButtonTextStyle(task.status),
                         ),
                       ]),
-                      itemBuilder: (context) => global.appSettings.kanbanStatusList
+                      itemBuilder: (context) => kanbanStatusList
                           .map(
                             (status) => PopupMenuItem(
                               value: status,
