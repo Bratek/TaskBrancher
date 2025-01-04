@@ -4,7 +4,8 @@ import 'package:task_brancher/services/hive_service.dart';
 enum CRUD { create, read, update, delete, none }
 
 class DataBase {
-  static HiveService db = HiveService();
+  //Объявление источника данных. При изменении источника переписать строку ниже
+  static HiveService db = HiveService(); // для Hive
 
   static Future<void> init() async {
     await db.init();
@@ -26,7 +27,7 @@ class DataBase {
     db.delete(obj);
   }
 
-  static void executeMetod(Base model, CRUD metod) {
+  static void crudMethod(Base model, CRUD metod) {
     switch (metod) {
       case CRUD.create:
         create(model);

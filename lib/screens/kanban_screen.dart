@@ -154,7 +154,9 @@ class _KanbanScreenState extends State<KanbanScreen> {
                 itemCount: kanbanStatusList.length,
                 itemBuilder: (context, index) {
                   Status status = kanbanStatusList[index];
-                  return statusList(context, statusColumns[status]!, status, kanbanStatusList);
+                  int nextStatusIndex = (index + 1 == kanbanStatusList.length) ? index : index + 1;
+                  Status nextStatus = kanbanStatusList[nextStatusIndex];
+                  return statusList(context, statusColumns[status]!, status, nextStatus);
                 },
               ),
             ),
@@ -165,7 +167,7 @@ class _KanbanScreenState extends State<KanbanScreen> {
   }
 
   //Отрисовка списка задач с указанным статусом
-  Widget statusList(BuildContext context, List<Task> taskList, Status status, List<Status> kanbanStatusList) {
+  Widget statusList(BuildContext context, List<Task> taskList, Status status, Status nextStatus) {
     //получение ширины экрана
     var sizeWidth = MediaQuery.of(context).size.width;
 
@@ -205,7 +207,7 @@ class _KanbanScreenState extends State<KanbanScreen> {
               itemCount: taskList.length,
               itemBuilder: (context, index) => KanbanCard(
                 task: taskList[index],
-                kanbanStatusList: kanbanStatusList,
+                nextStatus: nextStatus,
                 callbackFunction: () => setState(() {}),
               ),
             ),

@@ -14,6 +14,7 @@ class TasksListScreen extends StatefulWidget {
 
 class _TasksListScreenState extends State<TasksListScreen> {
   Base? parent;
+  bool visible = false;
 
   @override
   void initState() {
@@ -24,14 +25,14 @@ class _TasksListScreenState extends State<TasksListScreen> {
 
   void hundlerCreate(Task? task) {
     if (task != null) {
-      DataBase.executeMetod(task, CRUD.create);
+      DataBase.crudMethod(task, CRUD.create);
     }
     setState(() {});
   }
 
   void hundlerUpdate(Task? task) {
     if (task != null) {
-      DataBase.executeMetod(task, CRUD.update);
+      DataBase.crudMethod(task, CRUD.update);
     }
     setState(() {});
   }
@@ -78,6 +79,13 @@ class _TasksListScreenState extends State<TasksListScreen> {
             style: AppTheme.appTextStyle('Title'),
           ),
           actions: [
+            IconButton(
+              onPressed: () {
+                visible = !visible;
+                setState(() {});
+              },
+              icon: Icon(visible ? Icons.visibility : Icons.visibility_off),
+            ),
             Builder(
               builder: (context) {
                 return IconButton(
@@ -233,9 +241,11 @@ class _TasksListScreenState extends State<TasksListScreen> {
               child: ListView.builder(
                 itemCount: tasks.length,
                 itemBuilder: (context, index) {
-                  // Пропустить карточку если ее нет в настройках
-                  if (taskStatusList.contains(tasks[index].status) == false) {
-                    return Container();
+                  if (!visible) {
+                    // Если в настройках отображения списка задач статус не включен, тогда карточку не выводим
+                    if (taskStatusList.contains(tasks[index].status) == false) {
+                      return Container();
+                    }
                   }
 
                   // Выводим карточку задачи

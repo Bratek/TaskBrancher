@@ -17,7 +17,7 @@ class HiveService {
     await Hive.openBox("Project"); //key: ProjectId, value: json
     await Hive.openBox("Task"); //key: TaskId, value: json
     await Hive.openBox("Kanban"); //key: ProjectId, value: List<TaskId>
-    await Hive.openBox("Settings");
+    await Hive.openBox("Settings"); //key: Settings, value: json
 
     //Получение сохраненых настроек
     //global.appSettings = getSettings();
