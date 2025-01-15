@@ -29,7 +29,7 @@ class _MyHomePageState extends State<HomeScreen> {
       //Шапка ****************************************************************
       appBar: AppBar(
         backgroundColor: AppTheme.appColor('Background'),
-        //centerTitle: true,
+        centerTitle: true,
         title: Text(
           "Список проектов",
           style: AppTheme.appTextStyle('Title'),
@@ -40,6 +40,7 @@ class _MyHomePageState extends State<HomeScreen> {
       drawer: Drawer(
         child: Column(
           children: [
+            SizedBox(height: 50),
             DrawerHeader(
                 child: Column(children: [
               Image.asset(
@@ -58,84 +59,22 @@ class _MyHomePageState extends State<HomeScreen> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  ListTile(
-                    title: const Text('Home'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      // Переход на домашнюю страницу
-                    },
-                  ),
-                  ListTile(
-                    title: const Text('Settings'),
-                    onTap: () {
-                      Navigator.pop(context);
+                  TextButton(
+                    child: Text('Настройки', style: AppTheme.appTextStyle('TitleLight')),
+                    onPressed: () {
                       // Переход на страницу настроек
+                      Navigator.pop(context);
+                      global.navigateToScreen(context, routeName: '/settings');
                     },
                   ),
                 ],
               ),
             ),
             // Нижняя часть drawer с номером версии
-            ListTile(
-              title: const Text('Version 1.0.0'),
-              onTap: () {
-                Navigator.pop(context);
-                // Действие при нажатии на номер версии
-              },
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text('Version 1.0.0'),
             ),
-            // Container(
-            //   padding: const EdgeInsets.all(10),
-            //   child: Column(
-            //     children: [
-            //       const SizedBox(height: 40),
-            //       Container(
-            //         margin: const EdgeInsets.only(bottom: 10),
-            //         child: Column(children: [
-            //           Image.asset(
-            //             'assets/images/logo.png',
-            //             width: 64,
-            //             height: 64,
-            //           ),
-            //           const Text(
-            //             "Task Brancher",
-            //             style: TextStyle(
-            //                 fontSize: 20, fontWeight: FontWeight.bold),
-            //           ),
-            //         ]),
-            //       ),
-            //       const SizedBox(height: 20),
-            //       ListView(
-            //         shrinkWrap: true,
-            //         children: [
-            //           ListTile(
-            //             leading: const Icon(Icons.settings),
-            //             title: const Text("Настройки"),
-            //             onTap: () => Navigator.of(context).pop(),
-            //           ),
-            //         ],
-            //       ),
-            //       Expanded(
-            //         child: Column(
-            //           mainAxisAlignment: MainAxisAlignment.end,
-            //           children: [
-            //             Text("Версия 0.1.0",
-            //                 style: AppTheme.appTextStyle('BodyText')),
-            //           ],
-            //         ),
-            //       )
-            // TextButton(
-            //   onPressed: () {
-            //     HiveService.clearAllBox();
-            //     Navigator.of(context).pop();
-            //   },
-            //   child: Text(
-            //     "Очистить базу данных",
-            //     style: AppTheme.appTextStyle('BodyText'),
-            //   ),
-            // ),
-            //    ],
-            //  ),
-            //  ),
           ],
         ),
       ),
@@ -233,8 +172,7 @@ class _MyHomePageState extends State<HomeScreen> {
               itemBuilder: (context, index) {
                 return Slidable(
                   key: ValueKey(index),
-                  startActionPane:
-                      ActionPane(motion: const BehindMotion(), children: [
+                  startActionPane: ActionPane(motion: const BehindMotion(), children: [
                     SlidableAction(
                       // An action can be bigger than the others.
                       backgroundColor: AppTheme.appColor('DeleteColor'),
@@ -245,8 +183,7 @@ class _MyHomePageState extends State<HomeScreen> {
                         // Удалить проект
                         bool result = await confirmDialog(context,
                             title: "Удалить проект?",
-                            message:
-                                "При удалении проекта, будут удалены все его подзадачи.",
+                            message: "При удалении проекта, будут удалены все его подзадачи.",
                             okButtonText: "Удалить",
                             cancelButtonText: "Отмена");
 
@@ -269,8 +206,7 @@ class _MyHomePageState extends State<HomeScreen> {
                         icon: Icons.edit,
                         label: 'Изменить',
                         onPressed: (context) async {
-                          final result =
-                              await projectEditForm(context, projects[index]);
+                          final result = await projectEditForm(context, projects[index]);
                           if (result) {
                             // Сохранить изменения
                             //HiveService.addProject(result);
@@ -283,17 +219,15 @@ class _MyHomePageState extends State<HomeScreen> {
                     ],
                   ),
                   child: GestureDetector(
-                    child: ProjectCard(
-                        project: projects[index],
-                        inFocus: projects[index].equals(global.currentProject)),
+                    child:
+                        ProjectCard(project: projects[index], inFocus: projects[index].equals(global.currentProject)),
                     onTap: () {
                       if (!projects[index].equals(global.currentProject)) {
                         global.currentProject = projects[index];
                         setState(() {});
                       } else {
                         // Открыть окно вложенных задач
-                        global.navigateToScreen(context,
-                            routeName: '/tasks', arguments: projects[index]);
+                        global.navigateToScreen(context, routeName: '/tasks', arguments: projects[index]);
                         // Navigator.of(context)
                         //     .pushNamed('/tasks', arguments: projects[index]);
                       }
@@ -312,8 +246,7 @@ class _MyHomePageState extends State<HomeScreen> {
   Future<bool> projectEditForm(BuildContext context, Project project) async {
     //контроллеры для ввода c установленными начальными значениями
     final nameController = TextEditingController(text: project.title);
-    final descriptionController =
-        TextEditingController(text: project.description);
+    final descriptionController = TextEditingController(text: project.description);
     bool result = false;
 
     await showModalBottomSheet(
@@ -324,9 +257,7 @@ class _MyHomePageState extends State<HomeScreen> {
         return Container(
           height: 300,
           margin: EdgeInsets.only(
-              bottom: MediaQuery.of(context)
-                  .viewInsets
-                  .bottom), // нижний отступ для отталкивания от клавиатуры
+              bottom: MediaQuery.of(context).viewInsets.bottom), // нижний отступ для отталкивания от клавиатуры
           padding: const EdgeInsets.all(20),
           child: Center(
             child: Column(
@@ -356,37 +287,33 @@ class _MyHomePageState extends State<HomeScreen> {
                 const SizedBox(height: 10),
 
                 //кнопки
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        child: Text(
-                          'ОТМЕНА',
-                          style: AppTheme.buttonTextStyle(
-                              color: AppTheme.appColor('CancelButton')),
-                        ),
-                        onPressed: () async {
-                          result = false;
-                          // закрыть форму
-                          Navigator.pop(context);
-                        },
-                      ),
-                      TextButton(
-                        child: Text(
-                          'СОХРАНИТЬ',
-                          style: AppTheme.buttonTextStyle(
-                              color: AppTheme.appColor('OkButton')),
-                        ),
-                        onPressed: () {
-                          // Сохранить изменения
-                          project.title = nameController.text;
-                          project.description = descriptionController.text;
-                          result = true;
-                          // закрыть форму
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ]),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                  TextButton(
+                    child: Text(
+                      'ОТМЕНА',
+                      style: AppTheme.buttonTextStyle(color: AppTheme.appColor('CancelButton')),
+                    ),
+                    onPressed: () async {
+                      result = false;
+                      // закрыть форму
+                      Navigator.pop(context);
+                    },
+                  ),
+                  TextButton(
+                    child: Text(
+                      'СОХРАНИТЬ',
+                      style: AppTheme.buttonTextStyle(color: AppTheme.appColor('OkButton')),
+                    ),
+                    onPressed: () {
+                      // Сохранить изменения
+                      project.title = nameController.text;
+                      project.description = descriptionController.text;
+                      result = true;
+                      // закрыть форму
+                      Navigator.pop(context);
+                    },
+                  ),
+                ]),
               ],
             ),
           ),

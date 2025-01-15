@@ -9,6 +9,7 @@ export 'package:task_brancher/models/settings.dart';
 export 'package:task_brancher/screens/home_screen.dart';
 export 'package:task_brancher/screens/kanban_screen.dart';
 export 'package:task_brancher/screens/task_list_screen.dart';
+export 'package:task_brancher/screens/settings_screen.dart';
 
 //services
 export 'package:task_brancher/services/data_base.dart';

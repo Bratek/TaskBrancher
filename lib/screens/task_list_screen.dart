@@ -63,7 +63,7 @@ class _TasksListScreenState extends State<TasksListScreen> {
         //Шапка ****************************************************************
         appBar: AppBar(
           backgroundColor: AppTheme.appColor('Background'),
-          //centerTitle: true,
+          centerTitle: true,
           leading: IconButton(
             onPressed: () {
               goBackScreen(context);
@@ -86,16 +86,16 @@ class _TasksListScreenState extends State<TasksListScreen> {
               },
               icon: Icon(visible ? Icons.visibility : Icons.visibility_off),
             ),
-            Builder(
-              builder: (context) {
-                return IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: () {
-                    Scaffold.of(context).openEndDrawer();
-                  },
-                );
-              },
-            ),
+            // Builder(
+            //   builder: (context) {
+            //     return IconButton(
+            //       icon: const Icon(Icons.settings),
+            //       onPressed: () {
+            //         Scaffold.of(context).openEndDrawer();
+            //       },
+            //     );
+            //   },
+            // ),
           ],
         ),
         endDrawer: Drawer(

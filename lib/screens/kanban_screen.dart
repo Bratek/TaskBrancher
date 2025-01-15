@@ -47,55 +47,55 @@ class _KanbanScreenState extends State<KanbanScreen> {
           ),
         ),
         title: Text(widget.project.title, style: AppTheme.appTextStyle('Title')),
-        actions: [
-          Builder(
-            builder: (context) {
-              return IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-              );
-            },
-          ),
-        ],
+        // actions: [
+        //   Builder(
+        //     builder: (context) {
+        //       return IconButton(
+        //         icon: const Icon(Icons.settings),
+        //         onPressed: () {
+        //           Scaffold.of(context).openEndDrawer();
+        //         },
+        //       );
+        //     },
+        //   ),
+        // ],
       ),
-      endDrawer: Drawer(
-        child: SafeArea(
-            child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Text(
-                "Настройки канбан списка",
-                style: AppTheme.appTextStyle('Title'),
-              ),
-            ),
-            const Divider(
-              thickness: 1,
-              color: Colors.grey,
-              indent: 15,
-              endIndent: 15,
-            ),
-            SizedBox(
-              height: 350,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 15),
-                child: KanbanListSettings(callbackMethod: _onDrawerClosed),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "ЗАКРЫТЬ",
-                style: AppTheme.buttonTextStyle(color: AppTheme.appColor('OkButton')),
-              ),
-            ),
-          ],
-        )),
-      ),
+      // endDrawer: Drawer(
+      //   child: SafeArea(
+      //       child: Column(
+      //     children: [
+      //       Padding(
+      //         padding: const EdgeInsets.all(10),
+      //         child: Text(
+      //           "Настройки канбан списка",
+      //           style: AppTheme.appTextStyle('Title'),
+      //         ),
+      //       ),
+      //       const Divider(
+      //         thickness: 1,
+      //         color: Colors.grey,
+      //         indent: 15,
+      //         endIndent: 15,
+      //       ),
+      //       SizedBox(
+      //         height: 350,
+      //         child: Padding(
+      //           padding: const EdgeInsets.only(left: 15),
+      //           child: KanbanListSettings(callbackMethod: _onDrawerClosed),
+      //         ),
+      //       ),
+      //       TextButton(
+      //         onPressed: () {
+      //           Navigator.of(context).pop();
+      //         },
+      //         child: Text(
+      //           "ЗАКРЫТЬ",
+      //           style: AppTheme.buttonTextStyle(color: AppTheme.appColor('OkButton')),
+      //         ),
+      //       ),
+      //     ],
+      //   )),
+      // ),
 
       //Подвал ****************************************************************
       bottomNavigationBar: BottomAppBar(

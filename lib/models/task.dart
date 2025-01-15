@@ -35,4 +35,4 @@ class Task extends Base {
         'children': children,
         'status': status.name,
       };
-}
+} 

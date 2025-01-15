@@ -15,7 +15,7 @@ extension StatusExtension on Status {
         return "ОТМЕНЕНА";
       case Status.hidden:
         return "СКРЫТА";
-    }
+    } 
   }
 
   Status get nextStatus {
@@ -69,4 +69,24 @@ extension StatusExtension on Status {
     }
   }
 
+  
 }
+
+String statusNameFromString(String title) {
+    switch (title) {
+      case 'none':
+        return "НОВАЯ";
+      case 'inprogress':
+        return "В РАБОТЕ";
+      case 'verify':
+        return "НА ПРОВЕРКЕ";
+      case 'completed':
+        return "ЗАВЕРШЕНА";
+      case 'calceled':
+        return "ОТМЕНЕНА";
+      case 'hidden':
+        return "СКРЫТА";
+      default:
+        return "";
+    }
+  }

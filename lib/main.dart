@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:task_brancher/services/app_library.dart';
 
 void main() async {
+  //Ожидание инициализации дерева Flutter
   WidgetsFlutterBinding.ensureInitialized();
 
   //Инициализация Hive
@@ -28,12 +29,12 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(builder: (context) => const HomeScreen());
           case '/tasks':
             Base project = settings.arguments as Base;
-            return MaterialPageRoute(
-                builder: (context) => TasksListScreen(parent: project));
+            return MaterialPageRoute(builder: (context) => TasksListScreen(parent: project));
           case '/kanban':
             Project project = settings.arguments as Project;
-            return MaterialPageRoute(
-                builder: (context) => KanbanScreen(project: project));
+            return MaterialPageRoute(builder: (context) => KanbanScreen(project: project));
+          case '/settings':
+            return MaterialPageRoute(builder: (context) => const SettingsScreen());
           default:
             return MaterialPageRoute(builder: (context) => const HomeScreen());
         }
